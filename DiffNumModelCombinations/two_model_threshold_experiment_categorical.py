@@ -3,7 +3,7 @@ import time
 import numpy as np
 
 import helpers.helper_funcs as helpers
-import helpers.models as models
+import helpers.cifar_models as models
 
 def run_combinations(simple_model, complex_model, x_data, y_data):
     '''
@@ -79,15 +79,15 @@ def run_combined(simple_model, complex_model, inputs, labels, conf_value, thresh
 
 def main():
     print('Loading data...')
-    x_train, y_train, x_test, y_test = helpers.get_mnist_data()
+    x_train, y_train, x_test, y_test = helpers.get_cifar10_data()
 
     # train_and_save_models(x_train, y_train)
 
     print("Loading models...")
     # l0_model = tf.keras.models.load_model('models/l0_model')
-    l1_model = tf.keras.models.load_model('models/l1_model')
-    l2_model = tf.keras.models.load_model('models/l2_model')
-    l3_model = tf.keras.models.load_model('models/l3_model')
+    l1_model = tf.keras.models.load_model('models/cifar/l1_model')
+    l2_model = tf.keras.models.load_model('models/cifar/l2_model')
+    l3_model = tf.keras.models.load_model('models/cifar/l3_model')
     # l4_model = tf.keras.models.load_model('models/l4_model')
 
     # before_time = time.time()
