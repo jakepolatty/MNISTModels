@@ -76,15 +76,15 @@ def run_combined(simple_model, complex_model, inputs, labels, conf_value):
     simple_indices = simple_indices[simple_indices != np.array(None)] # remove None values
     simple_indices = np.asarray(simple_indices, dtype=np.int64)
 
-    reduced_simple_probs = np.take(simple_probs, simple_indices, axis=0)
-    simple_preds = reduced_simple_probs.argmax(axis=1)
+    simple_preds = np.argmax(simple_probs, axis=1)
 
     # ------------------------------------
     # Reorganize preds
     combined_preds = np.arange(inputs.shape[0])
 
-    np.put(combined_preds, simple_indices, simple_preds)
+    np.put(combined_preds, indices, simple_preds)
     np.put(combined_preds, complex_indices, complex_preds)
+    print(combined_preds, labels)
 
     simplePercent = simple_indices.shape[0] / (simple_indices.shape[0] + complex_indices.shape[0])
     return tf.reduce_mean(tf.cast(tf.equal(combined_preds, labels), tf.float32)).numpy(), time.time() - before, simplePercent
@@ -92,6 +92,7 @@ def run_combined(simple_model, complex_model, inputs, labels, conf_value):
 def main():
     print('Loading data...')
     x_train, y_train, x_test, y_test = helpers.get_cifar10_data()
+    y_test = tf.squeeze(y_test)
 
     #train_and_save_models(x_train, y_train)
 
