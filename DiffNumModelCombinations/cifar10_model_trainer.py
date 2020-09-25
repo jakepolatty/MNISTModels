@@ -27,7 +27,7 @@ def train_and_save_models(x_train, y_train):
 
     # 3 conv layers, 1 hidden layer
     l4_model = models.get_trained_l4_all_digit_model(x_train, y_train, input_shape, epochs=10)
-    l4_model.save('models/l4_model')
+    l4_model.save('models/cifar/l4_model')
 
 def main():
     print('Loading data...')

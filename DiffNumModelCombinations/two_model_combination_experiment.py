@@ -84,7 +84,6 @@ def run_combined(simple_model, complex_model, inputs, labels, conf_value):
 
     np.put(combined_preds, indices, simple_preds)
     np.put(combined_preds, complex_indices, complex_preds)
-    print(combined_preds, labels)
 
     simplePercent = simple_indices.shape[0] / (simple_indices.shape[0] + complex_indices.shape[0])
     return tf.reduce_mean(tf.cast(tf.equal(combined_preds, labels), tf.float32)).numpy(), time.time() - before, simplePercent
@@ -101,37 +100,37 @@ def main():
     l1_model = tf.keras.models.load_model('models/cifar/l1_model')
     l2_model = tf.keras.models.load_model('models/cifar/l2_model')
     l3_model = tf.keras.models.load_model('models/cifar/l3_model')
-    l4_model = tf.keras.models.load_model('models/l4_model')
+    l4_model = tf.keras.models.load_model('models/cifar/l4_model')
 
     l1_time = 0
     l2_time = 0
     l3_time = 0
     l4_time = 0
 
-    for i in range(1):
+    for i in range(5):
         before_time = time.time()
-        #accuracy = l1_model.predict(x_test)
-        print("L1 Accuracy: ", l1_model.evaluate(x_test, y_test, verbose=0)[1])
+        accuracy = l1_model.predict(x_test)
+        #print("L1 Accuracy: ", l1_model.evaluate(x_test, y_test, verbose=0)[1])
         l1_time += time.time() - before_time
 
         before_time = time.time()
-        #accuracy = l2_model.predict(x_test)
-        print("L2 Accuracy: ", l2_model.evaluate(x_test, y_test, verbose=0)[1])
+        accuracy = l2_model.predict(x_test)
+        #print("L2 Accuracy: ", l2_model.evaluate(x_test, y_test, verbose=0)[1])
         l2_time += time.time() - before_time
 
         before_time = time.time()
-        #accuracy = l3_model.predict(x_test)
-        print("L3 Accuracy: ", l3_model.evaluate(x_test, y_test, verbose=0)[1])
+        accuracy = l3_model.predict(x_test)
+        #print("L3 Accuracy: ", l3_model.evaluate(x_test, y_test, verbose=0)[1])
         l3_time += time.time() - before_time
 
         before_time = time.time()
-        #accuracy = l3_model.predict(x_test)
-        print("L4 Accuracy: ", l4_model.evaluate(x_test, y_test, verbose=0)[1])
+        accuracy = l3_model.predict(x_test)
+        #print("L4 Accuracy: ", l4_model.evaluate(x_test, y_test, verbose=0)[1])
         l4_time += time.time() - before_time
 
-    print("L1 Time:", l1_time / 1)
-    print("L2 Time:", l2_time / 1)
-    print("L3 Time:", l3_time / 1)
+    print("L1 Time:", l1_time / 5)
+    print("L2 Time:", l2_time / 5)
+    print("L3 Time:", l3_time / 5)
 
     l1_l2_accuracies = []
     l1_l3_accuracies = []
