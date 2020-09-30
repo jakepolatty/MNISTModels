@@ -124,7 +124,7 @@ def main():
         l3_time += time.time() - before_time
 
         before_time = time.time()
-        accuracy = l3_model.predict(x_test)
+        accuracy = l4_model.predict(x_test)
         #print("L4 Accuracy: ", l4_model.evaluate(x_test, y_test, verbose=0)[1])
         l4_time += time.time() - before_time
 
