@@ -9,3 +9,4 @@ researchEnv
 pytorch-exp/data/
 ./GreedyWalk/models/*
 DiffNumModelCombinations/models/*
+pytorch-exp
