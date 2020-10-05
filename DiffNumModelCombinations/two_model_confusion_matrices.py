@@ -67,22 +67,37 @@ def main():
     l1_model = tf.keras.models.load_model('models/cifar/l1_model')
     l2_model = tf.keras.models.load_model('models/cifar/l2_model')
     l3_model = tf.keras.models.load_model('models/cifar/l3_model')
-    # l4_model = tf.keras.models.load_model('models/l4_model')
+    l4_model = tf.keras.models.load_model('models/cifar/l4_model')
 
     p_yy, p_yn, p_ny, p_nn, yn_values, ny_values = run_combinations(l1_model, l2_model, x_test, y_test)
     print("L1 L2 values:", p_yy, p_ny, p_yn, p_nn)
-    print(yn_values)
-    print(ny_values)
+    #print(yn_values)
+    print(ny_values[:1000])
 
     p_yy, p_yn, p_ny, p_nn, yn_values, ny_values = run_combinations(l1_model, l3_model, x_test, y_test)
     print("L1 L3 values:", p_yy, p_ny, p_yn, p_nn)
-    print(yn_values)
-    print(ny_values)
+    #print(yn_values)
+    #print(ny_values[:1000])
+
+    p_yy, p_yn, p_ny, p_nn, yn_values, ny_values = run_combinations(l1_model, l4_model, x_test, y_test)
+    print("L1 L4 values:", p_yy, p_ny, p_yn, p_nn)
+    #print(yn_values)
+    #print(ny_values[:1000])
 
     p_yy, p_yn, p_ny, p_nn, yn_values, ny_values = run_combinations(l2_model, l3_model, x_test, y_test)
     print("L2 L3 values:", p_yy, p_ny, p_yn, p_nn)
-    print(yn_values)
-    print(ny_values)
+    #print(yn_values)
+    #print(ny_values[:1000])
+
+    p_yy, p_yn, p_ny, p_nn, yn_values, ny_values = run_combinations(l2_model, l4_model, x_test, y_test)
+    print("L2 L4 values:", p_yy, p_ny, p_yn, p_nn)
+    #print(yn_values)
+    #print(ny_values[:1000])
+
+    p_yy, p_yn, p_ny, p_nn, yn_values, ny_values = run_combinations(l3_model, l4_model, x_test, y_test)
+    print("L3 L4 values:", p_yy, p_ny, p_yn, p_nn)
+    #print(yn_values)
+    #print(ny_values[:1000])
 
 
 if __name__ == '__main__':

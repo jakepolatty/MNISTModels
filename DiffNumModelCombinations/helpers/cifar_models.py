@@ -7,13 +7,15 @@ import helpers.helper_funcs as helpers
 
 def get_untrained_l4_all_digit_model(input_shape):
     model = Sequential()
-    model.add(Conv2D(32, input_shape=input_shape, kernel_size=(5,5), padding='valid'))
+    model.add(Conv2D(32, input_shape=input_shape, kernel_size=(2,2), padding='valid'))
     model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2,2), padding='valid'))
 
-    model.add(Conv2D(64, kernel_size=(5, 5), padding='valid'))
+    model.add(Conv2D(64, kernel_size=(2, 2), padding='valid'))
     model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2,2), padding='valid'))
 
-    model.add(Conv2D(128, kernel_size=(5, 5), padding='valid'))
+    model.add(Conv2D(128, kernel_size=(2, 2), padding='valid'))
     model.add(Activation('relu'))
 
     model.add(Flatten())
@@ -74,11 +76,15 @@ def get_untrained_l2_all_digit_model(input_shape):
 
     # Creating a Sequential Model and adding the layers
     model = Sequential()
-    model.add(Conv2D(32, kernel_size=(3,3), input_shape=input_shape))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Conv2D(32, input_shape=input_shape, kernel_size=(5,5), padding='valid'))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2), padding='valid'))
+
     model.add(Flatten()) # Flattening the 2D arrays for fully connected layers
-    model.add(Dense(100, activation=tf.nn.relu))
+    model.add(Dense(100))
+    model.add(Activation('relu'))
     model.add(Dropout(0.2))
+
     model.add(Dense(10,activation=tf.nn.softmax))
     model.compile(optimizer='adam', 
                 loss='sparse_categorical_crossentropy', 
