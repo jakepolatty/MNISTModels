@@ -58,6 +58,7 @@ def run_combined(simple_model, complex_model, inputs, labels):
 def main():
     print('Loading data...')
     x_train, y_train, x_test, y_test = helpers.get_cifar10_data()
+    y_test = tf.squeeze(y_test)
 
     #train_and_save_models(x_train, y_train)
 
