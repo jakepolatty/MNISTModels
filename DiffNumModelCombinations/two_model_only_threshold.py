@@ -31,7 +31,7 @@ def run_combinations(simple_model, complex_model, x_data, y_data):
         simple_percents.append(simple_percent)
         threshold_counts.append(threshold_count)
     
-    return all_conf_values, accuracies, times, simple_percents, threshold_counts
+    return accuracies, times, simple_percents
 
 def run_combined(simple_model, complex_model, inputs, labels, threshold):
     '''
@@ -86,7 +86,7 @@ def main():
     l1_model = tf.keras.models.load_model('models/cifar/l1_model')
     l2_model = tf.keras.models.load_model('models/cifar/l2_model')
     l3_model = tf.keras.models.load_model('models/cifar/l3_model')
-    # l4_model = tf.keras.models.load_model('models/l4_model')
+    l4_model = tf.keras.models.load_model('models/cifar/l4_model')
 
     # before_time = time.time()
     # accuracy = l0_model.evaluate(x_test, y_test)
@@ -108,25 +108,82 @@ def main():
     # accuracy = l4_model.evaluate(x_test, y_test)
     # print("Time", time.time() - before_time)
 
-    all_model_accuracies = []
-    all_model_times = []
-    all_model_simple_percents = []
-    all_model_complex_percents = []
-    all_model_thresholds = []
+    l1_l2_accuracies = []
+    l1_l3_accuracies = []
+    l2_l3_accuracies = []
+    l1_l2_times = []
+    l1_l3_times = []
+    l2_l3_times = []
+    l1_l2_percents = []
+    l1_l3_percents = []
+    l2_l3_percents = []
 
-    for i in range(1):
+    l1_l4_accuracies = []
+    l2_l4_accuracies = []
+    l3_l4_accuracies = []
+    l1_l4_times = []
+    l2_l4_times = []
+    l3_l4_times = []
+    l1_l4_percents = []
+    l2_l4_percents = []
+    l3_l4_percents = []
+
+    for i in range(5):
         print("Run l1 l2... #" + str(i))
-        all_conf_values, accuracies, times, simple_percents, thresholds = run_combinations(l2_model, l3_model, x_test, y_test)
-        all_model_accuracies.append(accuracies)
-        all_model_times.append(times)
-        all_model_simple_percents.append(simple_percents)
-        all_model_thresholds.append(thresholds)
+        accuracies, times, simplePercents = run_combinations(l1_model, l2_model, x_test, y_test)
+        l1_l2_accuracies.append(accuracies)
+        l1_l2_times.append(times)
+        l1_l2_percents.append(simplePercents)
 
-    print("All Thresholds:", all_conf_values)
-    print("L1 L2 Accuracies:", np.mean(all_model_accuracies, axis=0))
-    print("L1 L2 Times:", np.mean(all_model_times, axis=0))
-    print("L1 L2 Simple Percents:", np.mean(all_model_simple_percents, axis=0))
-    print("L1 L2 Thresholds:", np.mean(all_model_thresholds, axis=0))
+        print("Run l1 l3... #" + str(i))
+        accuracies, times, simplePercents = run_combinations(l1_model, l3_model, x_test, y_test)
+        l1_l3_accuracies.append(accuracies)
+        l1_l3_times.append(times)
+        l1_l3_percents.append(simplePercents)
+
+        print("Run l2 l3... #" + str(i))
+        accuracies, times, simplePercents = run_combinations(l2_model, l3_model, x_test, y_test)
+        l2_l3_accuracies.append(accuracies)
+        l2_l3_times.append(times)
+        l2_l3_percents.append(simplePercents)
+
+        print("Run l1 l4... #" + str(i))
+        accuracies, times, simplePercents = run_combinations(l1_model, l4_model, x_test, y_test)
+        l1_l4_accuracies.append(accuracies)
+        l1_l4_times.append(times)
+        l1_l4_percents.append(simplePercents)
+
+        print("Run l2 l4... #" + str(i))
+        accuracies, times, simplePercents = run_combinations(l2_model, l4_model, x_test, y_test)
+        l2_l4_accuracies.append(accuracies)
+        l2_l4_times.append(times)
+        l2_l4_percents.append(simplePercents)
+
+        print("Run l3 l4... #" + str(i))
+        accuracies, times, simplePercents = run_combinations(l3_model, l4_model, x_test, y_test)
+        l3_l4_accuracies.append(accuracies)
+        l3_l4_times.append(times)
+        l3_l4_percents.append(simplePercents)
+
+    print("L1 L2 Accuracies:", np.mean(l1_l2_accuracies, axis=0))
+    print("L1 L2 Times:", np.mean(l1_l2_times, axis=0))
+    print("L1 L2 Simple Percents", np.mean(l1_l2_percents, axis=0))
+    print("L1 L3 Accuracies:", np.mean(l1_l3_accuracies, axis=0))
+    print("L1 L3 Times:", np.mean(l1_l3_times, axis=0))
+    print("L1 L3 Simple Percents", np.mean(l1_l3_percents, axis=0))
+    print("L2 L3 Accuracies:", np.mean(l2_l3_accuracies, axis=0))
+    print("L2 L3 Times:", np.mean(l2_l3_times, axis=0))
+    print("L2 L3 Simple Percents", np.mean(l2_l3_percents, axis=0))
+
+    print("L1 L4 Accuracies:", np.mean(l1_l4_accuracies, axis=0))
+    print("L1 L4 Times:", np.mean(l1_l4_times, axis=0))
+    print("L1 L4 Simple Percents", np.mean(l1_l4_percents, axis=0))
+    print("L2 L4 Accuracies:", np.mean(l2_l4_accuracies, axis=0))
+    print("L2 L4 Times:", np.mean(l2_l4_times, axis=0))
+    print("L2 L4 Simple Percents", np.mean(l2_l4_percents, axis=0))
+    print("L3 L4 Accuracies:", np.mean(l3_l4_accuracies, axis=0))
+    print("L3 L4 Times:", np.mean(l3_l4_times, axis=0))
+    print("L3 L4 Simple Percents", np.mean(l3_l4_percents, axis=0))
 
 if __name__ == '__main__':
     main()
