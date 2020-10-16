@@ -23,31 +23,25 @@ def main():
     l4_model = tf.keras.wrappers.scikit_learn.KerasClassifier(build_fn=models.get_l4_model, epochs=10, verbose=True)
     l4_model._estimator_type = "classifier"
 
-    ensemble1 = VotingClassifier(estimators=[('l1', l1_model),
+    ensemble = VotingClassifier(estimators=[('l1', l1_model),
                                             ('l2', l2_model),
                                             ('l3', l3_model),
                                             ('l4', l4_model)],
-                                voting='hard')
+                                voting='soft')
 
     l1_model.fit(x_train, y_train)
-    l1_model.save('models/cifar_ensemble/l1_model')
-
     l2_model.fit(x_train, y_train)
-    l2_model.save('models/cifar_ensemble/l2_model')
-
     l3_model.fit(x_train, y_train)
-    l3_model.save('models/cifar_ensemble/l3_model')
-
     l4_model.fit(x_train, y_train)
-    l4_model.save('models/cifar_ensemble/l4_model')
-
     ensemble.fit(x_train, y_train)
-    ensemble1.save('models/cifar_ensemble/hard_voting_model')
 
     for clf in (l1_model, l2_model, l3_model, l4_model, ensemble):
-        clf.fit(x_train, y_train)
+        before_time = time.time()
         y_pred = clf.predict(x_test)
+        model_time = time.time() - before_time
+
         print(clf.__class__.__name__, accuracy_score(y_test, y_pred))
+        print("Time: ", model_time)
 
 if __name__ == '__main__':
     main()
