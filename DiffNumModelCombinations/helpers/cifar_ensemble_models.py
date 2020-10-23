@@ -85,9 +85,11 @@ def get_l2_model():
 Simple 10 digit model
 '''
 def get_l1_model():
+    input_shape = (32, 32, 3)
+
     # Creating a Sequential Model and adding the layers
     model = Sequential()
-    model.add(Flatten()) # Flattening the 2D arrays for fully connected layers
+    model.add(Flatten(input_shape=input_shape)) # Flattening the 2D arrays for fully connected layers
     model.add(Dense(100, activation=tf.nn.relu))
     model.add(Dropout(0.2))
     model.add(Dense(10,activation=tf.nn.softmax))

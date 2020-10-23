@@ -3,7 +3,8 @@ import time
 import numpy as np
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import Normalizer
-from sklearn.ensemble import StackingClassifier
+from sklearn.ensemble import RandomForestClassifier, StackingClassifier
+from sklearn.ensemble import VotingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 import helpers.helper_funcs as helpers
@@ -24,25 +25,26 @@ def main():
     l4_model = tf.keras.wrappers.scikit_learn.KerasClassifier(build_fn=models.get_l4_model, epochs=10, verbose=True)
     l4_model._estimator_type = "classifier"
 
+
     ensemble = StackingClassifier(estimators=[('l1', l1_model),
                                             ('l2', l2_model),
                                             ('l3', l3_model),
                                             ('l4', l4_model)],
                                 final_estimator=LogisticRegression())
 
-    l1_model.fit(x_train, y_train)
-    l2_model.fit(x_train, y_train)
-    l3_model.fit(x_train, y_train)
-    l4_model.fit(x_train, y_train)
+    # l1_model.fit(x_train, y_train)
+    # l2_model.fit(x_train, y_train)
+    # l3_model.fit(x_train, y_train)
+    # l4_model.fit(x_train, y_train)
     ensemble.fit(x_train, y_train)
 
-    for clf in (l1_model, l2_model, l3_model, l4_model, ensemble):
-        before_time = time.time()
-        y_pred = clf.predict(x_test)
-        model_time = time.time() - before_time
+    before_time = time.time()
+    y_pred = ensemble.predict(x_test)
+    model_time = time.time() - before_time
 
-        print(clf.__class__.__name__, accuracy_score(y_test, y_pred))
-        print("Time: ", model_time)
+    print(ensemble.__class__.__name__, accuracy_score(y_test, y_pred))
+    print("Time: ", model_time)
+        
 
 if __name__ == '__main__':
     main()

@@ -42,42 +42,51 @@ def main():
         print("Time: ", model_time)
 
 
-
+    indices = [0, 1]
     ensemble12 = VotingClassifier(estimators=[('l1', l1_model),
                                             ('l2', l2_model)],
-                                voting='soft', verbose=False, weights=accuracy_scores)
+                                voting='soft', verbose=False, weights=[accuracy_scores[i] for i in indices])
+    indices = [0, 2]
     ensemble13 = VotingClassifier(estimators=[('l1', l1_model),
                                             ('l3', l3_model)],
-                                voting='soft', verbose=False, weights=accuracy_scores)
+                                voting='soft', verbose=False, weights=[accuracy_scores[i] for i in indices])
+    indices = [0, 3]
     ensemble14 = VotingClassifier(estimators=[('l1', l1_model),
                                             ('l4', l4_model)],
-                                voting='soft', verbose=False, weights=accuracy_scores)
+                                voting='soft', verbose=False, weights=[accuracy_scores[i] for i in indices])
+    indices = [1, 2]
     ensemble23 = VotingClassifier(estimators=[('l2', l2_model),
                                             ('l3', l3_model)],
-                                voting='soft', verbose=False, weights=accuracy_scores)
+                                voting='soft', verbose=False, weights=[accuracy_scores[i] for i in indices])
+    indices = [1, 3]
     ensemble24 = VotingClassifier(estimators=[('l2', l2_model),
                                             ('l4', l4_model)],
-                                voting='soft', verbose=False, weights=accuracy_scores)
+                                voting='soft', verbose=False, weights=[accuracy_scores[i] for i in indices])
+    indices = [2, 3]
     ensemble34 = VotingClassifier(estimators=[('l3', l3_model),
                                             ('l4', l4_model)],
-                                voting='soft', verbose=False, weights=accuracy_scores)
+                                voting='soft', verbose=False, weights=[accuracy_scores[i] for i in indices])
 
+    indices = [0, 1, 2]
     ensemble123 = VotingClassifier(estimators=[('l1', l1_model),
                                             ('l2', l2_model),
                                             ('l3', l3_model)],
-                                voting='soft', verbose=False, weights=accuracy_scores)
+                                voting='soft', verbose=False, weights=[accuracy_scores[i] for i in indices])
+    indices = [0, 1, 3]
     ensemble124 = VotingClassifier(estimators=[('l1', l1_model),
                                             ('l2', l2_model),
                                             ('l4', l4_model)],
-                                voting='soft', verbose=False, weights=accuracy_scores)
+                                voting='soft', verbose=False, weights=[accuracy_scores[i] for i in indices])
+    indices = [0, 2, 3]
     ensemble134 = VotingClassifier(estimators=[('l1', l1_model),
                                             ('l3', l3_model),
                                             ('l4', l4_model)],
-                                voting='soft', verbose=False, weights=accuracy_scores)
+                                voting='soft', verbose=False, weights=[accuracy_scores[i] for i in indices])
+    indices = [1, 2, 3]
     ensemble234 = VotingClassifier(estimators=[('l2', l2_model),
                                             ('l3', l3_model),
                                             ('l4', l4_model)],
-                                voting='soft', verbose=False, weights=accuracy_scores)
+                                voting='soft', verbose=False, weights=[accuracy_scores[i] for i in indices])
 
 
     ensemble1234 = VotingClassifier(estimators=[('l1', l1_model),
