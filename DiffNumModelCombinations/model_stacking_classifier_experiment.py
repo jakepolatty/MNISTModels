@@ -3,7 +3,8 @@ import time
 import numpy as np
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import Normalizer
-from sklearn.ensemble import RandomForestClassifier, StackingClassifier
+from sklearn.experimental import enable_hist_gradient_boosting
+from sklearn.ensemble import RandomForestClassifier, StackingClassifier, HistGradientBoostingClassifier
 from sklearn.ensemble import VotingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
@@ -29,27 +30,27 @@ def main():
 
     ensemble12 = StackingClassifier(estimators=[('l1', l1_model),
                                             ('l2', l2_model)],
-                                final_estimator=RandomForestClassifier())
+                                final_estimator=HistGradientBoostingClassifier(random_state=42))
 
     ensemble13 = StackingClassifier(estimators=[('l1', l1_model),
                                             ('l3', l3_model)],
-                                final_estimator=RandomForestClassifier())
+                                final_estimator=HistGradientBoostingClassifier(random_state=42))
 
     ensemble14 = StackingClassifier(estimators=[('l1', l1_model),
                                             ('l4', l4_model)],
-                                final_estimator=RandomForestClassifier())
+                                final_estimator=HistGradientBoostingClassifier(random_state=42))
 
     ensemble23 = StackingClassifier(estimators=[('l2', l2_model),
                                             ('l3', l3_model)],
-                                final_estimator=RandomForestClassifier())
+                                final_estimator=HistGradientBoostingClassifier(random_state=42))
 
     ensemble24 = StackingClassifier(estimators=[('l2', l2_model),
                                             ('l4', l4_model)],
-                                final_estimator=RandomForestClassifier())
+                                final_estimator=HistGradientBoostingClassifier(random_state=42))
 
     ensemble34 = StackingClassifier(estimators=[('l3', l3_model),
                                             ('l4', l4_model)],
-                                final_estimator=RandomForestClassifier())
+                                final_estimator=HistGradientBoostingClassifier(random_state=42))
 
     # l1_model.fit(x_train, y_train2)
     # l2_model.fit(x_train, y_train2)
