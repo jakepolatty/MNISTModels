@@ -30,7 +30,7 @@ def get_l4_model():
 
     # Compile the model
     model.compile(optimizer='adam', 
-                loss='sparse_categorical_crossentropy', 
+                loss='categorical_crossentropy', 
                 metrics=['accuracy'])
     return model
 
@@ -56,7 +56,7 @@ def get_l3_model():
 
     # Compile the model
     model.compile(optimizer='adam', 
-                loss='sparse_categorical_crossentropy', 
+                loss='categorical_crossentropy', 
                 metrics=['accuracy'])
     return model
 
@@ -76,7 +76,7 @@ def get_l2_model():
 
     model.add(Dense(10,activation=tf.nn.softmax))
     model.compile(optimizer='adam', 
-                loss='sparse_categorical_crossentropy', 
+                loss='categorical_crossentropy', 
                 metrics=['accuracy'])
 
     return model
@@ -94,7 +94,7 @@ def get_l1_model():
     model.add(Dropout(0.2))
     model.add(Dense(10,activation=tf.nn.softmax))
     model.compile(optimizer='adam', 
-                loss='sparse_categorical_crossentropy', 
+                loss='categorical_crossentropy', 
                 metrics=['accuracy'])
 
     return model
