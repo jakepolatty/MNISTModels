@@ -6,6 +6,7 @@ from sklearn.preprocessing import Normalizer
 from sklearn.experimental import enable_hist_gradient_boosting
 from sklearn.ensemble import RandomForestClassifier, StackingClassifier, HistGradientBoostingClassifier
 from sklearn.ensemble import VotingClassifier
+from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 import helpers.helper_funcs as helpers
@@ -30,27 +31,27 @@ def main():
 
     ensemble12 = StackingClassifier(estimators=[('l1', l1_model),
                                             ('l2', l2_model)],
-                                final_estimator=HistGradientBoostingClassifier(random_state=42))
+                                final_estimator=SVC())
 
     ensemble13 = StackingClassifier(estimators=[('l1', l1_model),
                                             ('l3', l3_model)],
-                                final_estimator=HistGradientBoostingClassifier(random_state=42))
+                                final_estimator=SVC())
 
     ensemble14 = StackingClassifier(estimators=[('l1', l1_model),
                                             ('l4', l4_model)],
-                                final_estimator=HistGradientBoostingClassifier(random_state=42))
+                                final_estimator=SVC())
 
     ensemble23 = StackingClassifier(estimators=[('l2', l2_model),
                                             ('l3', l3_model)],
-                                final_estimator=HistGradientBoostingClassifier(random_state=42))
+                                final_estimator=SVC())
 
     ensemble24 = StackingClassifier(estimators=[('l2', l2_model),
                                             ('l4', l4_model)],
-                                final_estimator=HistGradientBoostingClassifier(random_state=42))
+                                final_estimator=SVC())
 
     ensemble34 = StackingClassifier(estimators=[('l3', l3_model),
                                             ('l4', l4_model)],
-                                final_estimator=HistGradientBoostingClassifier(random_state=42))
+                                final_estimator=SVC())
 
     # l1_model.fit(x_train, y_train2)
     # l2_model.fit(x_train, y_train2)
