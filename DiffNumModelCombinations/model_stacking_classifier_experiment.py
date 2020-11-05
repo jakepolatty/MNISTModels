@@ -31,27 +31,53 @@ def main():
 
     ensemble12 = StackingClassifier(estimators=[('l1', l1_model),
                                             ('l2', l2_model)],
-                                final_estimator=SVC())
+                                final_estimator=LogisticRegression())
 
     ensemble13 = StackingClassifier(estimators=[('l1', l1_model),
                                             ('l3', l3_model)],
-                                final_estimator=SVC())
+                                final_estimator=LogisticRegression())
 
     ensemble14 = StackingClassifier(estimators=[('l1', l1_model),
                                             ('l4', l4_model)],
-                                final_estimator=SVC())
+                                final_estimator=LogisticRegression())
 
     ensemble23 = StackingClassifier(estimators=[('l2', l2_model),
                                             ('l3', l3_model)],
-                                final_estimator=SVC())
+                                final_estimator=LogisticRegression())
 
     ensemble24 = StackingClassifier(estimators=[('l2', l2_model),
                                             ('l4', l4_model)],
-                                final_estimator=SVC())
+                                final_estimator=LogisticRegression())
 
     ensemble34 = StackingClassifier(estimators=[('l3', l3_model),
                                             ('l4', l4_model)],
-                                final_estimator=SVC())
+                                final_estimator=LogisticRegression())
+
+    ensemble123 = StackingClassifier(estimators=[('l1', l1_model),
+                                            ('l2', l2_model),
+                                            ('l3', l3_model)],
+                                final_estimator=HistGradientBoostingClassifier(random_state=42))
+
+    ensemble124 = StackingClassifier(estimators=[('l1', l1_model),
+                                            ('l2', l2_model),
+                                            ('l4', l4_model)],
+                                final_estimator=HistGradientBoostingClassifier(random_state=42))
+
+    ensemble134 = StackingClassifier(estimators=[('l1', l1_model),
+                                            ('l3', l3_model),
+                                            ('l4', l4_model)],
+                                final_estimator=HistGradientBoostingClassifier(random_state=42))
+
+    ensemble234 = StackingClassifier(estimators=[('l2', l2_model),
+                                            ('l3', l3_model),
+                                            ('l4', l4_model)],
+                                final_estimator=HistGradientBoostingClassifier(random_state=42))
+
+    ensemble1234 = StackingClassifier(estimators=[('l1', l1_model),
+                                            ('l2', l2_model),
+                                            ('l3', l3_model),
+                                            ('l4', l4_model)],
+                                final_estimator=HistGradientBoostingClassifier(random_state=42))
 
     # l1_model.fit(x_train, y_train2)
     # l2_model.fit(x_train, y_train2)
@@ -59,14 +85,22 @@ def main():
     # l4_model.fit(x_train, y_train2)
     # ensemble.fit(x_train, y_train)
 
-    ensemble12.fit(x_train, y_train)
-    ensemble13.fit(x_train, y_train)
-    ensemble14.fit(x_train, y_train)
-    ensemble23.fit(x_train, y_train)
-    ensemble24.fit(x_train, y_train)
-    ensemble34.fit(x_train, y_train)
+    # ensemble12.fit(x_train, y_train)
+    # ensemble13.fit(x_train, y_train)
+    # ensemble14.fit(x_train, y_train)
+    # ensemble23.fit(x_train, y_train)
+    # ensemble24.fit(x_train, y_train)
+    # ensemble34.fit(x_train, y_train)
 
-    for clf in (ensemble12, ensemble13, ensemble14, ensemble23, ensemble24, ensemble34):
+    ensemble123.fit(x_train, y_train)
+    ensemble124.fit(x_train, y_train)
+    ensemble134.fit(x_train, y_train)
+    ensemble234.fit(x_train, y_train)
+
+    ensemble1234.fit(x_train, y_train)
+
+    for clf in (ensemble123, ensemble124, ensemble134, ensemble234,
+                ensemble1234):
         before_time = time.time()
         y_pred = clf.predict(x_test)
         model_time = time.time() - before_time
