@@ -14,13 +14,13 @@ def main():
     #y_test = tf.squeeze(y_test)
 
     print("Loading models...")
-    l1_model = tf.keras.wrappers.scikit_learn.KerasClassifier(build_fn=models.get_l1_model, epochs=10)
+    l1_model = tf.keras.wrappers.scikit_learn.KerasClassifier(build_fn=models.get_l1_model, epochs=5)
     l1_model._estimator_type = "classifier"
-    l2_model = tf.keras.wrappers.scikit_learn.KerasClassifier(build_fn=models.get_l2_model, epochs=10)
+    l2_model = tf.keras.wrappers.scikit_learn.KerasClassifier(build_fn=models.get_l2_model, epochs=5)
     l2_model._estimator_type = "classifier"
-    l3_model = tf.keras.wrappers.scikit_learn.KerasClassifier(build_fn=models.get_l3_model, epochs=10)
+    l3_model = tf.keras.wrappers.scikit_learn.KerasClassifier(build_fn=models.get_l3_model, epochs=5)
     l3_model._estimator_type = "classifier"
-    l4_model = tf.keras.wrappers.scikit_learn.KerasClassifier(build_fn=models.get_l4_model, epochs=10)
+    l4_model = tf.keras.wrappers.scikit_learn.KerasClassifier(build_fn=models.get_l4_model, epochs=5)
     l4_model._estimator_type = "classifier"
 
     ensemble12 = VotingClassifier(estimators=[('l1', l1_model),

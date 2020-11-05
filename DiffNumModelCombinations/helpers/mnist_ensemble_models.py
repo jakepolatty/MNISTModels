@@ -9,11 +9,11 @@ def get_l4_model():
     input_shape = (28, 28, 1)
 
     model = Sequential()
-    model.add(Conv2D(32, input_shape=input_shape, kernel_size=(2,2), padding='valid'))
+    model.add(Conv2D(32, input_shape=input_shape, kernel_size=(3,3), padding='valid'))
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2,2), padding='valid'))
 
-    model.add(Conv2D(64, kernel_size=(2, 2), padding='valid'))
+    model.add(Conv2D(64, kernel_size=(3, 3), padding='valid'))
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2,2), padding='valid'))
 
@@ -90,7 +90,7 @@ def get_l1_model():
     # Creating a Sequential Model and adding the layers
     model = Sequential()
     model.add(Flatten(input_shape=input_shape)) # Flattening the 2D arrays for fully connected layers
-    model.add(Dense(100, activation=tf.nn.relu))
+    model.add(Dense(50, activation=tf.nn.relu))
     model.add(Dropout(0.2))
     model.add(Dense(10,activation=tf.nn.softmax))
     model.compile(optimizer='adam', 
