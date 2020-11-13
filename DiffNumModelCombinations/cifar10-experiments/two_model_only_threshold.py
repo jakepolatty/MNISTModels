@@ -92,21 +92,21 @@ def main():
     # accuracy = l0_model.evaluate(x_test, y_test)
     # print("Time", time.time() - before_time)
 
-    # before_time = time.time()
-    # accuracy = l1_model.evaluate(x_test, y_test)
-    # print("Time", time.time() - before_time)
+    before_time = time.time()
+    accuracy = l1_model.evaluate(x_test, y_test)
+    print("Time", time.time() - before_time)
 
-    # before_time = time.time()
-    # accuracy = l2_model.evaluate(x_test, y_test)
-    # print("Time", time.time() - before_time)
+    before_time = time.time()
+    accuracy = l2_model.evaluate(x_test, y_test)
+    print("Time", time.time() - before_time)
 
-    # before_time = time.time()
-    # accuracy = l3_model.evaluate(x_test, y_test)
-    # print("Time", time.time() - before_time)
+    before_time = time.time()
+    accuracy = l3_model.evaluate(x_test, y_test)
+    print("Time", time.time() - before_time)
 
-    # before_time = time.time()
-    # accuracy = l4_model.evaluate(x_test, y_test)
-    # print("Time", time.time() - before_time)
+    before_time = time.time()
+    accuracy = l4_model.evaluate(x_test, y_test)
+    print("Time", time.time() - before_time)
 
     l1_l2_accuracies = []
     l1_l3_accuracies = []
