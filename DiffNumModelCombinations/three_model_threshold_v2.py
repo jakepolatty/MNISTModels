@@ -10,8 +10,7 @@ def run_combinations(simple_model, complex_model, most_complex_model, x_data, y_
     Attempt all confidence values in 0:0.1:1
     Store accuracy and time for each confidence value
     '''
-    thresholds = np.arange(0.2, 1.0, 0.04)
-    thresholds = np.append(thresholds, np.arange(0.965, 1.0, 0.005))
+    thresholds = np.arange(0, 1.1, 0.1)
 
     all_conf_values = []
     accuracies = []
