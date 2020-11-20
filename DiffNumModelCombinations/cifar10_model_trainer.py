@@ -33,13 +33,25 @@ def train_and_save_models(x_train, y_train):
     # l5_model = models.get_trained_l5_all_digit_model(x_train, y_train, input_shape, epochs=10)
     # l5_model.save('models/cifar/l5_model')
 
-    # 6 conv layers, 1 hidden layer
+    # 6 small conv layers, 1 hidden layer
     # l6_model = models.get_trained_l6_all_digit_model(x_train, y_train, input_shape, epochs=10)
     # l6_model.save('models/cifar/l6_model')
 
-    # 6 conv layers, data augmentation
-    l7_model = models.get_trained_l7_all_digit_model(x_train, y_train, input_shape, epochs=10)
-    l7_model.save('models/cifar/l7_model')
+    # 6 large conv layers, 1 hidden layers
+    # l7_model = models.get_trained_l7_all_digit_model(x_train, y_train, input_shape, epochs=10)
+    # l7_model.save('models/cifar/l7_model')
+
+    # 6 conv layers with data augmentation
+    # l8_model = models.get_trained_l8_all_digit_model(x_train, y_train, input_shape, epochs=10)
+    # l8_model.save('models/cifar/l8_model')
+
+    #
+    # l9_model = models.get_trained_l9_all_digit_model(x_train, y_train, input_shape, epochs=10)
+    # l9_model.save('models/cifar/l9_model')
+
+    #
+    # l10_model = models.get_trained_l10_all_digit_model(x_train, y_train, input_shape, epochs=10)
+    # l10_model.save('models/cifar/l10_model')
 
 def main():
     print('Loading data...')
