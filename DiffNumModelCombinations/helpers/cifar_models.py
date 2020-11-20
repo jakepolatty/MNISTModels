@@ -4,8 +4,8 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Conv2D, Dropout, Flatten, MaxPooling2D, Activation, BatchNormalization
 from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.constraints import max_norm
-from keras.preprocessing.image import ImageDataGenerator
-from keras import regularizers, optimizers
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras import regularizers, optimizers
 from sklearn.svm import SVC
 import helpers.helper_funcs as helpers
 
@@ -46,7 +46,16 @@ def get_untrained_l7_all_digit_model(input_shape, x_train):
     model.add(Flatten())
     model.add(Dense(10, activation='softmax'))
 
-    #data augmentation
+    opt_rms = optimizers.RMSprop(lr=0.0005,decay=1e-6)
+    model.compile(loss='sparse_categorical_crossentropy',
+        optimizer=opt_rms,
+        metrics=['accuracy'])
+    return model
+
+def get_trained_l7_all_digit_model(inputs, labels, input_shape, epochs=1):
+    model = get_untrained_l7_all_digit_model(input_shape, inputs)
+    #model.fit(x=inputs,y=labels, epochs=epochs, verbose=1)
+
     datagen = ImageDataGenerator(
         featurewise_center=False,
         samplewise_center=False,
@@ -59,17 +68,9 @@ def get_untrained_l7_all_digit_model(input_shape, x_train):
         horizontal_flip=True,
         vertical_flip=False
         )
-    datagen.fit(x_train)
+    datagen.fit(inputs)
 
-    opt_rms = keras.optimizers.rmsprop(lr=0.001,decay=1e-6)
-    model.compile(loss='sparse_categorical_crossentropy',
-        optimizer=opt_rms,
-        metrics=['accuracy'])
-    return model
-
-def get_trained_l7_all_digit_model(inputs, labels, input_shape, epochs=1):
-    model = get_untrained_l6_all_digit_model(input_shape, inputs)
-    model.fit(x=inputs,y=labels, epochs=epochs, verbose=1)
+    model.fit_generator(datagen.flow(inputs, labels, batch_size=32),steps_per_epoch=inputs.shape[0] // 32,epochs=3*epochs,verbose=1)
     return model
 
 
