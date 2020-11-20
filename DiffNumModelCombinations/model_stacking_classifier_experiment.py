@@ -27,6 +27,14 @@ def main():
     l3_model._estimator_type = "classifier"
     l4_model = tf.keras.wrappers.scikit_learn.KerasClassifier(build_fn=models.get_l4_model, epochs=5, verbose=True)
     l4_model._estimator_type = "classifier"
+    l5_model = tf.keras.wrappers.scikit_learn.KerasClassifier(build_fn=models.get_l1_model, epochs=10, verbose=True)
+    l5_model._estimator_type = "classifier"
+    l6_model = tf.keras.wrappers.scikit_learn.KerasClassifier(build_fn=models.get_l2_model, epochs=10, verbose=True)
+    l6_model._estimator_type = "classifier"
+    l7_model = tf.keras.wrappers.scikit_learn.KerasClassifier(build_fn=models.get_l3_model, epochs=10, verbose=True)
+    l7_model._estimator_type = "classifier"
+    l8_model = tf.keras.wrappers.scikit_learn.KerasClassifier(build_fn=models.get_l4_model, epochs=10, verbose=True)
+    l8_model._estimator_type = "classifier"
 
 
     ensemble12 = StackingClassifier(estimators=[('l1', l1_model),
@@ -79,6 +87,12 @@ def main():
                                             ('l4', l4_model)],
                                 final_estimator=HistGradientBoostingClassifier(random_state=42))
 
+    ensemble5678 = StackingClassifier(estimators=[('l5', l5_model),
+                                            ('l6', l6_model),
+                                            ('l7', l7_model),
+                                            ('l8', l8_model)],
+                                final_estimator=LogisticRegression(), verbose=True)
+
     # l1_model.fit(x_train, y_train2)
     # l2_model.fit(x_train, y_train2)
     # l3_model.fit(x_train, y_train2)
@@ -92,15 +106,14 @@ def main():
     # ensemble24.fit(x_train, y_train)
     # ensemble34.fit(x_train, y_train)
 
-    ensemble123.fit(x_train, y_train)
-    ensemble124.fit(x_train, y_train)
-    ensemble134.fit(x_train, y_train)
-    ensemble234.fit(x_train, y_train)
+    # ensemble123.fit(x_train, y_train)
+    # ensemble124.fit(x_train, y_train)
+    # ensemble134.fit(x_train, y_train)
+    # ensemble234.fit(x_train, y_train)
 
-    ensemble1234.fit(x_train, y_train)
+    ensemble5678.fit(x_train, y_train)
 
-    for clf in (ensemble123, ensemble124, ensemble134, ensemble234,
-                ensemble1234):
+    for clf in (ensemble5678, ensemble5678):
         before_time = time.time()
         y_pred = clf.predict(x_test)
         model_time = time.time() - before_time
