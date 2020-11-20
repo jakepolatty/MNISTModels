@@ -3,7 +3,7 @@ import time
 import numpy as np
 
 import helpers.helper_funcs as helpers
-import helpers.cifar_models as models
+import helpers.cifar_models as modelsg 
 
 def run_combinations(simple_model, complex_model, most_complex_model, x_data, y_data):
     '''

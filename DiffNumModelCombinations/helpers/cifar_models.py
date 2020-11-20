@@ -2,6 +2,8 @@ import tensorflow as tf
 import numpy as np
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Conv2D, Dropout, Flatten, MaxPooling2D, Activation
+from tensorflow.keras.optimizers import SGD
+from tensorflow.keras.constraints import max_norm
 from sklearn.svm import SVC
 import helpers.helper_funcs as helpers
 
@@ -11,7 +13,7 @@ L6
 def get_untrained_l6_all_digit_model(input_shape):
     model = Sequential()
  
-    model.add(Conv2D(32, (3, 3), padding='same', activation='relu', input_shape=x_train.shape[1:]))
+    model.add(Conv2D(32, (3, 3), padding='same', activation='relu', input_shape=input_shape))
     model.add(Dropout(0.2))
  
     model.add(Conv2D(32,(3,3),padding='same', activation='relu'))
@@ -31,11 +33,11 @@ def get_untrained_l6_all_digit_model(input_shape):
  
     model.add(Flatten())
     model.add(Dropout(0.2))
-    model.add(Dense(1024,activation='relu',kernel_constraint=maxnorm(3)))
+    model.add(Dense(1024,activation='relu',kernel_constraint=max_norm(3)))
     model.add(Dropout(0.2))
-    model.add(Dense(num_classes, activation='softmax'))
+    model.add(Dense(10, activation='softmax'))
 
-    sgd = SGD(lr = 0.1, decay=1e-6, momentum=0.9 nesterov=True)
+    sgd = SGD(lr = 0.1, decay=1e-6, momentum=0.9, nesterov=True)
  
     model.compile(loss='sparse_categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
     return model
@@ -72,7 +74,7 @@ def get_untrained_l5_all_digit_model(input_shape):
     model.add(Dense(10))
     model.add(Activation('softmax'))
  
-    sgd = SGD(lr = 0.1, decay=1e-6, momentum=0.9 nesterov=True)
+    sgd = SGD(lr = 0.1, decay=1e-6, momentum=0.9, nesterov=True)
  
     model.compile(loss='sparse_categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
     return model

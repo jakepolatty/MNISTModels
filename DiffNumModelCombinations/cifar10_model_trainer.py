@@ -14,20 +14,28 @@ def train_and_save_models(x_train, y_train):
     # l0_model.save('models/cifar/l0_model')
 
     # 1 hidden layer
-    l1_model = models.get_trained_l1_all_digit_model(x_train, y_train, epochs=5)
-    l1_model.save('models/cifar/l1_model')
+    #l1_model = models.get_trained_l1_all_digit_model(x_train, y_train, epochs=5)
+    #l1_model.save('models/cifar/l1_model')
 
     # 1 conv layer, 1 hidden layer
-    l2_model = models.get_trained_l2_all_digit_model(x_train, y_train, input_shape, epochs=5)
-    l2_model.save('models/cifar/l2_model')
+    #l2_model = models.get_trained_l2_all_digit_model(x_train, y_train, input_shape, epochs=5)
+    #l2_model.save('models/cifar/l2_model')
 
     # 2 conv layers, 1 hidden layer
-    l3_model = models.get_trained_l3_all_digit_model(x_train, y_train, input_shape, epochs=5)
-    l3_model.save('models/cifar/l3_model')
+    #l3_model = models.get_trained_l3_all_digit_model(x_train, y_train, input_shape, epochs=5)
+    #l3_model.save('models/cifar/l3_model')
 
     # 3 conv layers, 1 hidden layer
-    l4_model = models.get_trained_l4_all_digit_model(x_train, y_train, input_shape, epochs=5)
-    l4_model.save('models/cifar/l4_model')
+    #l4_model = models.get_trained_l4_all_digit_model(x_train, y_train, input_shape, epochs=5)
+    #l4_model.save('models/cifar/l4_model')
+
+    # 4 conv layers, 1 hidden layer
+    l5_model = models.get_trained_l5_all_digit_model(x_train, y_train, input_shape, epochs=100)
+    l5_model.save('models/cifar/l5_model')
+
+    # 6 conv layers, 1 hidden layer
+    l6_model = models.get_trained_l6_all_digit_model(x_train, y_train, input_shape, epochs=100)
+    l6_model.save('models/cifar/l6_model')
 
 def main():
     print('Loading data...')
