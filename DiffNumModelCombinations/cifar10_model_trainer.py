@@ -4,6 +4,9 @@ import numpy as np
 
 import helpers.helper_funcs as helpers
 import helpers.cifar_models as models
+import helpers.model9 as model9
+import helpers.model10 as model10
+import helpers.resnet as resnet
 
 def train_and_save_models(x_train, y_train):
     # Train each of the models 
@@ -41,17 +44,19 @@ def train_and_save_models(x_train, y_train):
     # l7_model = models.get_trained_l7_all_digit_model(x_train, y_train, input_shape, epochs=10)
     # l7_model.save('models/cifar/l7_model')
 
-    # 6 conv layers with data augmentation
+    # 6 conv layers with default data augmentation
     # l8_model = models.get_trained_l8_all_digit_model(x_train, y_train, input_shape, epochs=10)
     # l8_model.save('models/cifar/l8_model')
 
-    #
-    # l9_model = models.get_trained_l9_all_digit_model(x_train, y_train, input_shape, epochs=10)
+    # 4 conv layers with custom data augmentation
+    # l9_model = model9.get_trained_l9_all_digit_model(x_train, y_train, input_shape, epochs=10)
     # l9_model.save('models/cifar/l9_model')
 
-    #
-    # l10_model = models.get_trained_l10_all_digit_model(x_train, y_train, input_shape, epochs=10)
-    # l10_model.save('models/cifar/l10_model')
+    # Wide residual network with default data augmentation
+    l10_model = resnet.cifar_resnet20()
+    l10_model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    l10_model.fit(x=x_train,y=y_train, epochs=10, verbose=1)
+    l10_model.save('models/cifar/l10_model')
 
 def main():
     print('Loading data...')
