@@ -1,11 +1,10 @@
 import tensorflow as tf
 import time
 import numpy as np
+from tensorflow.keras.optimizers import SGD
 
 import helpers.helper_funcs as helpers
 import helpers.cifar_models as models
-import helpers.model9 as model9
-import helpers.model10 as model10
 import helpers.resnet as resnet
 
 def train_and_save_models(x_train, y_train):
@@ -48,14 +47,14 @@ def train_and_save_models(x_train, y_train):
     # l8_model = models.get_trained_l8_all_digit_model(x_train, y_train, input_shape, epochs=10)
     # l8_model.save('models/cifar/l8_model')
 
-    # 4 conv layers with custom data augmentation
-    # l9_model = model9.get_trained_l9_all_digit_model(x_train, y_train, input_shape, epochs=10)
-    # l9_model.save('models/cifar/l9_model')
+    # Resnet20
+    l9_model = resnet.cifar_resnet20(load_weights=True)
+    l9_model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    l9_model.save('models/cifar/l9_model')
 
-    # Wide residual network with default data augmentation
-    l10_model = resnet.cifar_resnet20()
+    # Resnet32
+    l10_model = resnet.cifar_WRN_16_4(load_weights=True)
     l10_model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-    l10_model.fit(x=x_train,y=y_train, epochs=10, verbose=1)
     l10_model.save('models/cifar/l10_model')
 
 def main():

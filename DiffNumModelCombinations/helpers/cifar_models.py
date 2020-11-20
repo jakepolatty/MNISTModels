@@ -49,9 +49,9 @@ def get_untrained_l8_all_digit_model(input_shape, x_train):
     model.add(Flatten())
     model.add(Dense(10, activation='softmax'))
 
-    opt_rms = optimizers.RMSprop(lr=0.0005,decay=1e-6)
+    #opt_rms = optimizers.RMSprop(lr=0.0005,decay=1e-6)
     model.compile(loss='sparse_categorical_crossentropy',
-        optimizer=opt_rms,
+        optimizer='adam',
         metrics=['accuracy'])
     return model
 
@@ -82,17 +82,18 @@ L7
 '''
 
 def get_untrained_l7_all_digit_model(input_shape):
-    model.add(Conv2D(filters=64, kernel_size=3, input_shape=input_shape, activation='relu', padding='same'))
-    model.add(Conv2D(filters=64, kernel_size=3, input_shape=input_shape, activation='relu', padding='same'))
-    model.add(MaxPool2D(pool_size=2))
+    model = Sequential()
+    model.add(Conv2D(64, (3, 3), input_shape=input_shape, activation='relu', padding='same'))
+    model.add(Conv2D(64, (3, 3), input_shape=input_shape, activation='relu', padding='same'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
 
-    model.add(Conv2D(filters=128, kernel_size=3, activation='relu', padding='same'))
-    model.add(Conv2D(filters=128, kernel_size=3, activation='relu', padding='same'))
-    model.add(MaxPool2D(pool_size=2))
+    model.add(Conv2D(128, (3, 3), activation='relu', padding='same'))
+    model.add(Conv2D(128, (3, 3), activation='relu', padding='same'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
 
-    model.add(Conv2D(filters=128, kernel_size=3, activation='relu', padding='same'))
-    model.add(Conv2D(filters=128, kernel_size=3, activation='relu', padding='same'))
-    model.add(MaxPool2D(pool_size=2))
+    model.add(Conv2D(128, (3, 3), activation='relu', padding='same'))
+    model.add(Conv2D(128, (3, 3), activation='relu', padding='same'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
 
     model.add(Flatten())
     model.add(Dense(512, activation='relu'))
@@ -103,7 +104,7 @@ def get_untrained_l7_all_digit_model(input_shape):
     return model
 
 def get_trained_l7_all_digit_model(inputs, labels, input_shape, epochs=1):
-    model = get_untrained_l7_all_digit_model(inputs)
+    model = get_untrained_l7_all_digit_model(input_shape)
     model.fit(x=inputs,y=labels, epochs=epochs, verbose=1)
     return model
 
