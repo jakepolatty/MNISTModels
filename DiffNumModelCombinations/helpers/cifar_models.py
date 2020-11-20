@@ -5,6 +5,87 @@ from tensorflow.keras.layers import Dense, Conv2D, Dropout, Flatten, MaxPooling2
 from sklearn.svm import SVC
 import helpers.helper_funcs as helpers
 
+'''
+L6
+'''
+def get_untrained_l6_all_digit_model(input_shape):
+    model = Sequential()
+ 
+    model.add(Conv2D(32, (3, 3), padding='same', activation='relu', input_shape=x_train.shape[1:]))
+    model.add(Dropout(0.2))
+ 
+    model.add(Conv2D(32,(3,3),padding='same', activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2,2)))
+ 
+    model.add(Conv2D(64,(3,3),padding='same',activation='relu'))
+    model.add(Dropout(0.2))
+ 
+    model.add(Conv2D(64,(3,3),padding='same',activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2,2)))
+ 
+    model.add(Conv2D(128,(3,3),padding='same',activation='relu'))
+    model.add(Dropout(0.2))
+ 
+    model.add(Conv2D(128,(3,3),padding='same',activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2,2)))
+ 
+    model.add(Flatten())
+    model.add(Dropout(0.2))
+    model.add(Dense(1024,activation='relu',kernel_constraint=maxnorm(3)))
+    model.add(Dropout(0.2))
+    model.add(Dense(num_classes, activation='softmax'))
+
+    sgd = SGD(lr = 0.1, decay=1e-6, momentum=0.9 nesterov=True)
+ 
+    model.compile(loss='sparse_categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
+    return model
+
+def get_trained_l6_all_digit_model(inputs, labels, input_shape, epochs=1):
+    model = get_untrained_l6_all_digit_model(input_shape)
+    model.fit(x=inputs,y=labels, epochs=epochs, verbose=1)
+    return model
+
+
+'''
+L5
+'''
+def get_untrained_l5_all_digit_model(input_shape):
+    model = Sequential()
+    model.add(Conv2D(32, (3, 3), padding='same', input_shape=input_shape))
+    model.add(Activation('relu'))
+    model.add(Conv2D(32,(3, 3)))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
+ 
+    model.add(Conv2D(64, (3, 3), padding='same'))
+    model.add(Activation('relu'))
+    model.add(Conv2D(64, (3,3)))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
+ 
+    model.add(Flatten())
+    model.add(Dense(512))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(10))
+    model.add(Activation('softmax'))
+ 
+    sgd = SGD(lr = 0.1, decay=1e-6, momentum=0.9 nesterov=True)
+ 
+    model.compile(loss='sparse_categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
+    return model
+
+def get_trained_l5_all_digit_model(inputs, labels, input_shape, epochs=1):
+    model = get_untrained_l5_all_digit_model(input_shape)
+    model.fit(x=inputs,y=labels, epochs=epochs, verbose=1)
+    return model
+
+
+'''
+L4
+'''
 def get_untrained_l4_all_digit_model(input_shape):
     model = Sequential()
     model.add(Conv2D(32, input_shape=input_shape, kernel_size=(2,2), padding='valid'))
