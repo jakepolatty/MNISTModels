@@ -8,7 +8,7 @@ import helpers.cifar_models as models
 def main():
     print('Loading data...')
     x_train, y_train, x_test, y_test = helpers.get_cifar10_data()
-    y_test = tf.squeeze(y_test)
+    y_test2 = tf.squeeze(y_test)
 
     #train_and_save_models(x_train, y_train)
 
@@ -31,22 +31,22 @@ def main():
     for i in range(5):
         before_time = time.time()
         #accuracy = l1_model.predict(x_test)
-        print("L1 Accuracy: ", l1_model.evaluate(x_test, y_test, verbose=0)[1])
+        print("L1 Accuracy: ", l1_model.evaluate(x_test, y_test2, verbose=0)[1])
         l1_time.append(time.time() - before_time)
 
         before_time = time.time()
         #accuracy = l2_model.predict(x_test)
-        print("L2 Accuracy: ", l2_model.evaluate(x_test, y_test, verbose=0)[1])
+        print("L2 Accuracy: ", l2_model.evaluate(x_test, y_test2, verbose=0)[1])
         l2_time.append(time.time() - before_time)
 
         before_time = time.time()
         #accuracy = l3_model.predict(x_test)
-        print("L3 Accuracy: ", l3_model.evaluate(x_test, y_test, verbose=0)[1])
+        print("L3 Accuracy: ", l3_model.evaluate(x_test, y_test2, verbose=0)[1])
         l3_time.append(time.time() - before_time)
 
         before_time = time.time()
         #accuracy = l4_model.predict(x_test)
-        print("L4 Accuracy: ", l4_model.evaluate(x_test, y_test, verbose=0)[1])
+        print("L4 Accuracy: ", l4_model.evaluate(x_test, y_test2, verbose=0)[1])
         l4_time.append(time.time() - before_time)
 
         before_time = time.time()
@@ -56,7 +56,7 @@ def main():
 
         before_time = time.time()
         #accuracy = l4_model.predict(x_test)
-        print("L6 Accuracy: ", l6_model.evaluate(x_test, y_test, verbose=0)[1])
+        print("L6 Accuracy: ", l6_model.evaluate(x_test, y_test2, verbose=0)[1])
         l6_time.append(time.time() - before_time)
 
     print("L1 Time:", np.mean(l1_time[1:], axis=0), l1_time)

@@ -30,11 +30,11 @@ def train_and_save_models(x_train, y_train):
     #l4_model.save('models/cifar/l4_model')
 
     # 4 conv layers, 1 hidden layer
-    l5_model = models.get_trained_l5_all_digit_model(x_train, y_train, input_shape, epochs=100)
-    l5_model.save('models/cifar/l5_model')
+    # l5_model = models.get_trained_l5_all_digit_model(x_train, y_train, input_shape, epochs=10)
+    # l5_model.save('models/cifar/l5_model')
 
     # 6 conv layers, 1 hidden layer
-    l6_model = models.get_trained_l6_all_digit_model(x_train, y_train, input_shape, epochs=100)
+    l6_model = models.get_trained_l6_all_digit_model(x_train, y_train, input_shape, epochs=10)
     l6_model.save('models/cifar/l6_model')
 
 def main():
