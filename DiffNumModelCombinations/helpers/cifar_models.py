@@ -1,11 +1,77 @@
 import tensorflow as tf
 import numpy as np
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Conv2D, Dropout, Flatten, MaxPooling2D, Activation
+from tensorflow.keras.layers import Dense, Conv2D, Dropout, Flatten, MaxPooling2D, Activation, BatchNormalization
 from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.constraints import max_norm
+from keras.preprocessing.image import ImageDataGenerator
+from keras import regularizers, optimizers
 from sklearn.svm import SVC
 import helpers.helper_funcs as helpers
+
+'''
+L7
+'''
+def get_untrained_l7_all_digit_model(input_shape, x_train):
+    baseMapNum = 32
+    weight_decay = 1e-4
+    model = Sequential()
+    model.add(Conv2D(baseMapNum, (3,3), padding='same', kernel_regularizer=regularizers.l2(weight_decay), input_shape=input_shape))
+    model.add(Activation('relu'))
+    model.add(BatchNormalization())
+    model.add(Conv2D(baseMapNum, (3,3), padding='same', kernel_regularizer=regularizers.l2(weight_decay)))
+    model.add(Activation('relu'))
+    model.add(BatchNormalization())
+    model.add(MaxPooling2D(pool_size=(2,2)))
+    model.add(Dropout(0.2))
+
+    model.add(Conv2D(2*baseMapNum, (3,3), padding='same', kernel_regularizer=regularizers.l2(weight_decay)))
+    model.add(Activation('relu'))
+    model.add(BatchNormalization())
+    model.add(Conv2D(2*baseMapNum, (3,3), padding='same', kernel_regularizer=regularizers.l2(weight_decay)))
+    model.add(Activation('relu'))
+    model.add(BatchNormalization())
+    model.add(MaxPooling2D(pool_size=(2,2)))
+    model.add(Dropout(0.3))
+
+    model.add(Conv2D(4*baseMapNum, (3,3), padding='same', kernel_regularizer=regularizers.l2(weight_decay)))
+    model.add(Activation('relu'))
+    model.add(BatchNormalization())
+    model.add(Conv2D(4*baseMapNum, (3,3), padding='same', kernel_regularizer=regularizers.l2(weight_decay)))
+    model.add(Activation('relu'))
+    model.add(BatchNormalization())
+    model.add(MaxPooling2D(pool_size=(2,2)))
+    model.add(Dropout(0.4))
+
+    model.add(Flatten())
+    model.add(Dense(10, activation='softmax'))
+
+    #data augmentation
+    datagen = ImageDataGenerator(
+        featurewise_center=False,
+        samplewise_center=False,
+        featurewise_std_normalization=False,
+        samplewise_std_normalization=False,
+        zca_whitening=False,
+        rotation_range=15,
+        width_shift_range=0.1,
+        height_shift_range=0.1,
+        horizontal_flip=True,
+        vertical_flip=False
+        )
+    datagen.fit(x_train)
+
+    opt_rms = keras.optimizers.rmsprop(lr=0.001,decay=1e-6)
+    model.compile(loss='sparse_categorical_crossentropy',
+        optimizer=opt_rms,
+        metrics=['accuracy'])
+    return model
+
+def get_trained_l7_all_digit_model(inputs, labels, input_shape, epochs=1):
+    model = get_untrained_l6_all_digit_model(input_shape, inputs)
+    model.fit(x=inputs,y=labels, epochs=epochs, verbose=1)
+    return model
+
 
 '''
 L6

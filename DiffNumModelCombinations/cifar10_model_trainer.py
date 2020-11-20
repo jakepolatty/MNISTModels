@@ -37,6 +37,10 @@ def train_and_save_models(x_train, y_train):
     l6_model = models.get_trained_l6_all_digit_model(x_train, y_train, input_shape, epochs=100)
     l6_model.save('models/cifar/l6_model')
 
+    # 6 conv layers, data augmentation
+    l7_model = models.get_trained_l7_all_digit_model(x_train, y_train, input_shape, epochs=10)
+    l7_model.save('models/cifar/l7_model')
+
 def main():
     print('Loading data...')
     x_train, y_train, x_test, y_test = helpers.get_cifar10_data()
