@@ -80,8 +80,7 @@ def main():
                                             ('l8', l8_model)],
                                 voting='soft', verbose=True)
 
-    ensemble = VotingClassifier(estimators=[('l5', l5_model),
-                                            ('l7', l7_model),
+    ensemble = VotingClassifier(estimators=[('l7', l7_model),
                                             ('l8', l8_model)],
                                 voting='soft', verbose=True)
 

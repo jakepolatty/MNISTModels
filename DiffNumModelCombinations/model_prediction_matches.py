@@ -16,13 +16,13 @@ def main():
     l1_model = tf.keras.models.load_model('models/cifar/l1_model')
     l2_model = tf.keras.models.load_model('models/cifar/l2_model')
     l3_model = tf.keras.models.load_model('models/cifar/l3_model')
-    # l4_model = tf.keras.models.load_model('models/cifar/l4_model')
-    # l5_model = tf.keras.models.load_model('models/cifar/l5_model')
-    # l6_model = tf.keras.models.load_model('models/cifar/l6_model')
-    # l7_model = tf.keras.models.load_model('models/cifar/l7_model')
-    # l8_model = tf.keras.models.load_model('models/cifar/l8_model')
-    # l9_model = tf.keras.models.load_model('models/cifar/l9_model')
-    # l10_model = tf.keras.models.load_model('models/cifar/l10_model')
+    l4_model = tf.keras.models.load_model('models/cifar/l4_model')
+    l5_model = tf.keras.models.load_model('models/cifar/l5_model')
+    l6_model = tf.keras.models.load_model('models/cifar/l6_model')
+    l7_model = tf.keras.models.load_model('models/cifar/l7_model')
+    l8_model = tf.keras.models.load_model('models/cifar/l8_model')
+    l9_model = tf.keras.models.load_model('models/cifar/l9_model')
+    l10_model = tf.keras.models.load_model('models/cifar/l10_model')
 
 
     # Get dictionary of counts of each class in y_test

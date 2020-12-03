@@ -48,12 +48,12 @@ def train_and_save_models(x_train, y_train):
     # l8_model.save('models/cifar/l8_model')
 
     # Resnet20
-    l9_model = resnet.cifar_resnet20(load_weights=True)
-    l9_model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-    l9_model.save('models/cifar/l9_model')
+    # l9_model = resnet.cifar_resnet20(load_weights=True)
+    # l9_model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    # l9_model.save('models/cifar/l9_model')
 
     # Resnet32
-    l10_model = resnet.cifar_WRN_16_4(load_weights=True)
+    l10_model = resnet.cifar_resnet110(load_weights=True)
     l10_model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     l10_model.save('models/cifar/l10_model')
 
