@@ -3,26 +3,26 @@ import time
 import numpy as np
 
 import helpers.helper_funcs as helpers
-import helpers.cifar_models as models
+#import helpers.cifar_models as models
 
 def main():
     print('Loading data...')
-    x_train, y_train, x_test, y_test = helpers.get_cifar10_data()
+    x_train, y_train, x_test, y_test = helpers.get_mnist_data()
     y_test = tf.squeeze(y_test)
 
     #train_and_save_models(x_train, y_train)
 
     print("Loading models...")
-    l1_model = tf.keras.models.load_model('models/cifar/l1_model')
-    l2_model = tf.keras.models.load_model('models/cifar/l2_model')
-    l3_model = tf.keras.models.load_model('models/cifar/l3_model')
-    l4_model = tf.keras.models.load_model('models/cifar/l4_model')
-    l5_model = tf.keras.models.load_model('models/cifar/l5_model')
-    l6_model = tf.keras.models.load_model('models/cifar/l6_model')
-    l7_model = tf.keras.models.load_model('models/cifar/l7_model')
-    l8_model = tf.keras.models.load_model('models/cifar/l8_model')
-    l9_model = tf.keras.models.load_model('models/cifar/l9_model')
-    l10_model = tf.keras.models.load_model('models/cifar/l10_model')
+    l1_model = tf.keras.models.load_model('models/mnist/l1_model')
+    l2_model = tf.keras.models.load_model('models/mnist/l2_model')
+    l3_model = tf.keras.models.load_model('models/mnist/l3_model')
+    l4_model = tf.keras.models.load_model('models/mnist/l4_model')
+    l5_model = tf.keras.models.load_model('models/mnist/l5_model')
+    l6_model = tf.keras.models.load_model('models/mnist/l6_model')
+    l7_model = tf.keras.models.load_model('models/mnist/l7_model')
+    l8_model = tf.keras.models.load_model('models/mnist/l8_model')
+    l9_model = tf.keras.models.load_model('models/mnist/l9_model')
+    l10_model = tf.keras.models.load_model('models/mnist/l10_model')
 
 
     # Get dictionary of counts of each class in y_test

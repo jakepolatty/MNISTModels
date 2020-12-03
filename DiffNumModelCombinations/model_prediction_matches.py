@@ -3,7 +3,7 @@ import time
 import numpy as np
 
 import helpers.helper_funcs as helpers
-import helpers.cifar_models as models
+#import helpers.cifar_models as models
 
 def main():
     print('Loading data...')
