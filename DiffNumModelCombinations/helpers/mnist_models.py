@@ -1,16 +1,65 @@
 import tensorflow as tf
 import numpy as np
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Conv2D, Dropout, Flatten, MaxPooling2D, Activation, BatchNormalization, Lambda
+from tensorflow.keras.layers import Dense, Conv2D, Dropout, Flatten, MaxPooling2D, Activation, BatchNormalization, Lambda, PReLU
 from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.constraints import max_norm
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras import regularizers, optimizers
 from tensorflow.keras import backend as K
+from tensorflow.keras.callbacks import ReduceLROnPlateau
 import tensorflow_addons as tfa
 from sklearn.svm import SVC
 import helpers.helper_funcs as helpers
 
+'''
+L10
+'''
+def get_untrained_l10_all_digit_model(input_shape, x_train):
+    mean=np.mean(x_train)
+    std=np.std(x_train)
+
+    def standardize(x):
+        return (x-mean)/std
+
+    model=Sequential()
+    model.add(Lambda(standardize,input_shape=(28,28,1)))
+    model.add(Conv2D(64,(3,3),activation="linear"))
+    model.add(PReLU())
+    model.add(Conv2D(64,(3,3),activation="linear"))
+    model.add(PReLU())
+    
+    model.add(MaxPooling2D(pool_size=(2,2)))
+    model.add(BatchNormalization())
+    model.add(Conv2D(128,(3,3),activation="linear"))
+    model.add(PReLU())
+    model.add(Conv2D(128,(3,3),activation="linear"))
+    model.add(PReLU())
+    
+    model.add(MaxPooling2D(pool_size=(2,2)))
+    model.add(BatchNormalization())
+    model.add(Conv2D(256,(3,3),activation="linear"))
+    model.add(PReLU())
+    
+    model.add(MaxPooling2D(pool_size=(2,2)))
+    
+    model.add(Flatten())
+    model.add(BatchNormalization())
+    model.add(Dense(512,activation="linear"))
+    model.add(PReLU())
+    model.add(Dense(10,activation="softmax"))
+    
+    model.compile(loss="sparse_categorical_crossentropy",optimizer="adam",metrics=["accuracy"])
+    return model
+
+def get_trained_l10_all_digit_model(inputs, labels, input_shape, epochs=1):
+    model = get_untrained_l10_all_digit_model(input_shape, inputs)
+
+    datagen = ImageDataGenerator()
+    datagen.fit(inputs)
+
+    model.fit_generator(datagen.flow(inputs, labels, batch_size=64),steps_per_epoch=inputs.shape[0] // 64,epochs=epochs,verbose=1)
+    return model
 
 '''
 L9
@@ -19,11 +68,11 @@ def get_untrained_l9_all_digit_model(input_shape, x_train):
     model = Sequential()
     model.add(Conv2D(32, kernel_size=(3, 3),activation='relu',kernel_initializer='he_normal',input_shape=input_shape))
     model.add(Conv2D(32, kernel_size=(3, 3),activation='relu',kernel_initializer='he_normal'))
-    model.add(MaxPool2D((2, 2)))
+    model.add(MaxPooling2D((2, 2)))
     model.add(Dropout(0.20))
     model.add(Conv2D(64, (3, 3), activation='relu',padding='same',kernel_initializer='he_normal'))
     model.add(Conv2D(64, (3, 3), activation='relu',padding='same',kernel_initializer='he_normal'))
-    model.add(MaxPool2D(pool_size=(2, 2)))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Dropout(0.25))
     model.add(Conv2D(128, (3, 3), activation='relu',padding='same',kernel_initializer='he_normal'))
     model.add(Dropout(0.25))
@@ -31,18 +80,18 @@ def get_untrained_l9_all_digit_model(input_shape, x_train):
     model.add(Dense(128, activation='relu'))
     model.add(BatchNormalization())
     model.add(Dropout(0.25))
-    model.add(Dense(num_classes, activation='softmax'))
+    model.add(Dense(10, activation='softmax'))
 
-    model.compile(loss=keras.losses.categorical_crossentropy,
-                  optimizer=keras.optimizers.RMSprop(),
+    model.compile(loss='sparse_categorical_crossentropy',
+                  optimizer=optimizers.RMSprop(),
                   metrics=['accuracy'])
     return model
 
 def get_trained_l9_all_digit_model(inputs, labels, input_shape, epochs=1):
-    model = get_untrained_l8_all_digit_model(input_shape, inputs)
+    model = get_untrained_l9_all_digit_model(input_shape, inputs)
     #model.fit(x=inputs,y=labels, epochs=epochs, verbose=1)
 
-    learning_rate_reduction = ReduceLROnPlateau(monitor="val_acc", patience=3, verbose=1, factor=0.5, min_lr=0.0001)
+    learning_rate_reduction = ReduceLROnPlateau(monitor="accuracy", patience=3, verbose=1, factor=0.5, min_lr=0.0001)
 
     datagen = ImageDataGenerator(
         featurewise_center=False,

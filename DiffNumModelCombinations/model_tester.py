@@ -33,8 +33,8 @@ def main():
     l6_model = tf.keras.models.load_model('models/mnist/l6_model')
     l7_model = tf.keras.models.load_model('models/mnist/l7_model')
     l8_model = tf.keras.models.load_model('models/mnist/l8_model')
-    # l9_model = tf.keras.models.load_model('models/mnist/l9_model')
-    # l10_model = tf.keras.models.load_model('models/mnist/l10_model')
+    l9_model = tf.keras.models.load_model('models/mnist/l9_model')
+    l10_model = tf.keras.models.load_model('models/mnist/l10_model')
 
     l1_time = []
     l2_time = []
@@ -88,15 +88,15 @@ def main():
         print("L8 Accuracy: ", l8_model.evaluate(x_test, y_test2, verbose=0)[1])
         l8_time.append(time.time() - before_time)
 
-        # before_time = time.time()
+        before_time = time.time()
         # #accuracy = l3_model.predict(x_test)
-        # print("L9 Accuracy: ", l9_model.evaluate(x_test, y_test2, verbose=0)[1])
-        # l9_time.append(time.time() - before_time)
+        print("L9 Accuracy: ", l9_model.evaluate(x_test, y_test2, verbose=0)[1])
+        l9_time.append(time.time() - before_time)
 
-        # before_time = time.time()
+        before_time = time.time()
         # #accuracy = l4_model.predict(x_test)
-        # print("L10 Accuracy: ", l10_model.evaluate(x_test, y_test2, verbose=0)[1])
-        # l10_time.append(time.time() - before_time)
+        print("L10 Accuracy: ", l10_model.evaluate(x_test, y_test2, verbose=0)[1])
+        l10_time.append(time.time() - before_time)
 
     print("L1 Time:", np.mean(l1_time[1:], axis=0), l1_time)
     print("L2 Time:", np.mean(l2_time[1:], axis=0), l2_time)
@@ -106,8 +106,8 @@ def main():
     print("L6 Time:", np.mean(l6_time[1:], axis=0), l6_time)
     print("L7 Time:", np.mean(l3_time[1:], axis=0), l7_time)
     print("L8 Time:", np.mean(l4_time[1:], axis=0), l8_time)
-    # print("L9 Time:", np.mean(l5_time[1:], axis=0), l9_time)
-    # print("L10 Time:", np.mean(l6_time[1:], axis=0), l10_time)
+    print("L9 Time:", np.mean(l5_time[1:], axis=0), l9_time)
+    print("L10 Time:", np.mean(l6_time[1:], axis=0), l10_time)
 
 
 if __name__ == '__main__':
