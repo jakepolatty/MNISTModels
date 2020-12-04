@@ -52,9 +52,15 @@ def train_and_save_models(x_train, y_train):
     # l9_model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     # l9_model.save('models/cifar/l9_model')
 
+    l9_model = models.get_trained_l9_all_digit_model(x_train, y_train, input_shape, epochs=20)
+    l9_model.save('models/cifar/l9_model')
+
     # Resnet32
-    l10_model = resnet.cifar_resnet110(load_weights=True)
-    l10_model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    # l10_model = resnet.cifar_resnet110(load_weights=True)
+    # l10_model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    # l10_model.save('models/cifar/l10_model')
+
+    l10_model = models.get_trained_l10_all_digit_model(x_train, y_train, input_shape, epochs=10)
     l10_model.save('models/cifar/l10_model')
 
 def main():
