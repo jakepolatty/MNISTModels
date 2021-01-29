@@ -1,11 +1,69 @@
 import tensorflow as tf
 import numpy as np
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Conv2D, Dropout, Flatten, MaxPooling2D, Activation, BatchNormalization
+from tensorflow.keras.layers import Dense, Conv2D, Dropout, Flatten, MaxPooling2D, Activation, BatchNormalization, Lambda, PReLU
 from tensorflow.keras.constraints import max_norm
 from tensorflow.keras import regularizers, optimizers
 from sklearn.svm import SVC
 import helpers.helper_funcs as helpers
+
+
+def get_l10_model():
+    input_shape = (32, 32, 3)
+
+    model=Sequential()
+    model.add(Conv2D(64,(3,3),activation="linear"))
+    model.add(PReLU())
+    model.add(Conv2D(64,(3,3),activation="linear"))
+    model.add(PReLU())
+    
+    model.add(MaxPooling2D(pool_size=(2,2)))
+    model.add(BatchNormalization())
+    model.add(Conv2D(128,(3,3),activation="linear"))
+    model.add(PReLU())
+    model.add(Conv2D(128,(3,3),activation="linear"))
+    model.add(PReLU())
+    
+    model.add(MaxPooling2D(pool_size=(2,2)))
+    model.add(BatchNormalization())
+    model.add(Conv2D(256,(3,3),activation="linear"))
+    model.add(PReLU())
+    
+    model.add(MaxPooling2D(pool_size=(2,2)))
+    
+    model.add(Flatten())
+    model.add(BatchNormalization())
+    model.add(Dense(512,activation="linear"))
+    model.add(PReLU())
+    model.add(Dense(10,activation="softmax"))
+    
+    model.compile(loss="sparse_categorical_crossentropy",optimizer="adam",metrics=["accuracy"])
+    return model
+
+def get_l9_model():
+    input_shape = (32, 32, 3)
+
+    model = Sequential()
+    model.add(Conv2D(32, kernel_size=(3, 3),activation='relu',kernel_initializer='he_normal',input_shape=input_shape))
+    model.add(Conv2D(32, kernel_size=(3, 3),activation='relu',kernel_initializer='he_normal'))
+    model.add(MaxPooling2D((2, 2)))
+    model.add(Dropout(0.20))
+    model.add(Conv2D(64, (3, 3), activation='relu',padding='same',kernel_initializer='he_normal'))
+    model.add(Conv2D(64, (3, 3), activation='relu',padding='same',kernel_initializer='he_normal'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
+    model.add(Conv2D(128, (3, 3), activation='relu',padding='same',kernel_initializer='he_normal'))
+    model.add(Dropout(0.25))
+    model.add(Flatten())
+    model.add(Dense(128, activation='relu'))
+    model.add(BatchNormalization())
+    model.add(Dropout(0.25))
+    model.add(Dense(10, activation='softmax'))
+
+    model.compile(loss='sparse_categorical_crossentropy',
+                  optimizer=optimizers.RMSprop(),
+                  metrics=['accuracy'])
+    return model
 
 def get_l8_model():
     input_shape = (32, 32, 3)

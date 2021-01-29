@@ -30,6 +30,10 @@ def main():
     l7_model._estimator_type = "classifier"
     l8_model = tf.keras.wrappers.scikit_learn.KerasClassifier(build_fn=models.get_l8_model, epochs=10, verbose=True)
     l8_model._estimator_type = "classifier"
+    l9_model = tf.keras.wrappers.scikit_learn.KerasClassifier(build_fn=models.get_l9_model, epochs=10, verbose=True)
+    l9_model._estimator_type = "classifier"
+    l10_model = tf.keras.wrappers.scikit_learn.KerasClassifier(build_fn=models.get_l10_model, epochs=10, verbose=True)
+    l10_model._estimator_type = "classifier"
 
     # ensemble12 = VotingClassifier(estimators=[('l1', l1_model),
     #                                         ('l2', l2_model)],
@@ -68,21 +72,29 @@ def main():
     #                             voting='soft', verbose=False)
 
 
-    ensemble1234 = VotingClassifier(estimators=[('l1', l1_model),
+    # ensemble1234 = VotingClassifier(estimators=[('l1', l1_model),
+    #                                         ('l2', l2_model),
+    #                                         ('l3', l3_model),
+    #                                         ('l4', l4_model)],
+    #                             voting='soft', verbose=True)
+
+    # ensemble5678 = VotingClassifier(estimators=[('l5', l5_model),
+    #                                         ('l6', l6_model),
+    #                                         ('l7', l7_model),
+    #                                         ('l8', l8_model)],
+    #                             voting='soft', verbose=True)
+
+    ensemble = VotingClassifier(estimators=[('l1', l1_model),
                                             ('l2', l2_model),
                                             ('l3', l3_model),
-                                            ('l4', l4_model)],
-                                voting='soft', verbose=True)
-
-    ensemble5678 = VotingClassifier(estimators=[('l5', l5_model),
+                                            ('l4', l4_model),
+                                            ('l5', l5_model),
                                             ('l6', l6_model),
                                             ('l7', l7_model),
-                                            ('l8', l8_model)],
-                                voting='soft', verbose=True)
-
-    ensemble = VotingClassifier(estimators=[('l7', l7_model),
-                                            ('l8', l8_model)],
-                                voting='soft', verbose=True)
+                                            ('l8', l8_model),
+                                            ('l9', l9_model),
+                                            ('l10', l10_model)],
+                                voting='hard', verbose=True)
 
     # l1_model.fit(x_train, y_train)
     # l2_model.fit(x_train, y_train)
