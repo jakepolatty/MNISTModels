@@ -17,24 +17,38 @@ def main():
     l1_model = tf.keras.models.load_model('models/cifar/l1_model')
     l2_model = tf.keras.models.load_model('models/cifar/l2_model')
     l3_model = tf.keras.models.load_model('models/cifar/l3_model')
-    l4_model = tf.keras.models.load_model('models/cifar/l4_model')
-    l5_model = tf.keras.models.load_model('models/cifar/l5_model')
-    l6_model = tf.keras.models.load_model('models/cifar/l6_model')
-    l7_model = tf.keras.models.load_model('models/cifar/l7_model')
-    l8_model = tf.keras.models.load_model('models/cifar/l8_model')
-    l9_model = tf.keras.models.load_model('models/cifar/l9_model')
-    l10_model = tf.keras.models.load_model('models/cifar/l10_model')
+    # l4_model = tf.keras.models.load_model('models/cifar/l4_model')
+    # l5_model = tf.keras.models.load_model('models/cifar/l5_model')
+    # l6_model = tf.keras.models.load_model('models/cifar/l6_model')
+    # l7_model = tf.keras.models.load_model('models/cifar/l7_model')
+    # l8_model = tf.keras.models.load_model('models/cifar/l8_model')
+    # l9_model = tf.keras.models.load_model('models/cifar/l9_model')
+    # l10_model = tf.keras.models.load_model('models/cifar/l10_model')
 
-    models = [l1_model, l2_model, l3_model, l4_model, l5_model, l6_model, l7_model, l8_model, l9_model, l10_model]
+    models = [l1_model, l2_model, l3_model]
     num_classes = 10
     accuracies = compute_class_matrix_A(models, num_classes, x_test, y_test)
 
-    best_models = np.argmax(accuracies, axis=0)
+    prob_matrix = np.zeros((len(models), x_test.shape[0]))
+    pred_matrix = np.zeros((len(models), x_test.shape[0]))
 
-    # Loop through each of the class buckets and run the corresponding model, before adding up the correct predictions
-    total_correct = 0 
+    for i in range(len(models)):
+        model = models[i]
+        model_probs = model.predict(x_test)
+        model_highest_probs = np.amax(model_probs, axis=1)
+        model_preds = np.argmax(model_probs, axis=1)
 
-    print("Final accuracy: ", total_correct / x_test.shape[0])
+        prob_matrix[i] = model_highest_probs
+        pred_matrix[i] = model_preds
+
+    final_preds = np.zeros(x_test.shape[0])
+    for i in range(x_test.shape[0]):
+        col = prob_matrix[:, i]
+        final_preds[i] = pred_matrix[np.argmax(col), i]
+
+    final_accuracy = tf.reduce_mean(tf.cast(tf.equal(final_preds, y_test), tf.float32)).numpy()
+
+    print("Final accuracy: ", final_accuracy)
 
 
 def compute_class_matrix_A(models, num_classes, x_test, y_test):
