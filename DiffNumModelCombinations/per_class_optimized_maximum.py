@@ -27,8 +27,12 @@ def main():
 
     models = [l1_model, l2_model, l3_model]
     num_classes = 10
-    accuracies = compute_class_matrix_A(models, num_classes, x_test, y_test)
 
+    #unweighted_optimize(models, num_classes, x_test, y_test)
+    weighted_optimize(models, num_classes, x_test, y_test, weight_type="B")
+
+
+def unweighted_optimize(models, num_classes, x_test, y_test):
     prob_matrix = np.zeros((len(models), x_test.shape[0]))
     pred_matrix = np.zeros((len(models), x_test.shape[0]))
 
@@ -49,6 +53,39 @@ def main():
     final_accuracy = tf.reduce_mean(tf.cast(tf.equal(final_preds, y_test), tf.float32)).numpy()
 
     print("Final accuracy: ", final_accuracy)
+
+
+def weighted_optimize(models, num_classes, x_test, y_test, weight_type):
+    if weight_type == "A":
+        accuracies = compute_class_matrix_A(models, num_classes, x_test, y_test)
+    else:
+        accuracies = compute_class_matrix_B(models, num_classes, x_test, y_test)
+
+    prob_matrix = np.zeros((len(models), x_test.shape[0]))
+    pred_matrix = np.zeros((len(models), x_test.shape[0]))
+
+    for i in range(len(models)):
+        model = models[i]
+        model_probs = model.predict(x_test)
+
+        model_accuracies = np.transpose([accuracies[i]])
+        model_probs = (model_probs.T * model_accuracies).T
+
+        model_highest_probs = np.amax(model_probs, axis=1)
+        model_preds = np.argmax(model_probs, axis=1)
+
+        prob_matrix[i] = model_highest_probs
+        pred_matrix[i] = model_preds
+
+    final_preds = np.zeros(x_test.shape[0])
+    for i in range(x_test.shape[0]):
+        col = prob_matrix[:, i]
+        final_preds[i] = pred_matrix[np.argmax(col), i]
+
+    final_accuracy = tf.reduce_mean(tf.cast(tf.equal(final_preds, y_test), tf.float32)).numpy()
+
+    print("Final accuracy: ", final_accuracy)
+
 
 
 def compute_class_matrix_A(models, num_classes, x_test, y_test):
