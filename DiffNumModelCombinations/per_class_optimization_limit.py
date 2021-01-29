@@ -24,7 +24,7 @@ def main():
 
     models = [l1_model, l2_model, l3_model, l4_model, l5_model, l6_model, l7_model, l8_model, l9_model, l10_model]
     num_classes = 10
-    accuracies = compute_class_matrix(models, num_classes, x_test, y_test)
+    accuracies = compute_class_matrix_A(models, num_classes, x_test, y_test)
 
     best_models = np.argmax(accuracies, axis=0)
 
@@ -38,6 +38,7 @@ def main():
     total_correct = 0 
     for i in range(num_classes):
         bucket_inputs = np.array(buckets[i])
+        print(best_models[i])
         model = models[best_models[i]]
         probs = model.predict(bucket_inputs)
         preds = np.argmax(probs, axis=1)
@@ -46,9 +47,34 @@ def main():
     print("Final accuracy: ", total_correct / x_test.shape[0])
 
 
+def compute_class_matrix_A(models, num_classes, x_test, y_test):
+    # Get dictionary of counts of each class in y_test
+    y_test_np = y_test.numpy()
+    unique, counts = np.unique(y_test_np, return_counts=True)
+    count_dict = dict(zip(unique, counts))
+
+    # Set up accuracy grid
+    num_models = len(models)
+    accuracies = np.zeros((num_models, num_classes))
+
+    # Iterate over all models and get their predicted outputs
+    for i in range(num_models):
+        model = models[i]
+
+        model_probs = model.predict(x_test)
+        model_preds = np.argmax(model_probs, axis=1)
+
+        # Iterate over all 10 classes
+        for j in range(num_classes):
+            # Compute the number of times where the prediction matches the test output for that class
+            class_count = len(np.where((model_preds == j) & (y_test_np == j))[0])
+            accuracies[i][j] = class_count / count_dict[j]
+
+    print(accuracies)
+    return accuracies
 
 
-def compute_class_matrix(models, num_classes, x_test, y_test):
+def compute_class_matrix_B(models, num_classes, x_test, y_test):
     # Get dictionary of counts of each class in y_test
     y_test_np = y_test.numpy()
     count_dicts = []
