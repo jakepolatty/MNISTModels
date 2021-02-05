@@ -26,14 +26,14 @@ def main():
     models = [l1_model, l2_model, l3_model, l4_model, l5_model, l6_model, l7_model, l8_model, l9_model, l10_model]
     num_classes = 10
 
-    average_optimization(models, num_classes, x_test, y_test, weight_type="A", threshold=0.8, iterations=1)    
+    average_optimization(models, num_classes, x_test, y_test, weight_type="A", threshold=0.8, iterations=10)    
     #optimize(models, num_classes, x_test, y_test, weight_type="B")
     #optimize(models, num_classes, x_test, y_test)
 
 def average_optimization(models, num_classes, x_test, y_test, weight_type, threshold, iterations):
     if weight_type == "A":
         accuracies = compute_class_matrix_A(models, num_classes, x_test, y_test)
-    else weight_type == "B":
+    elif weight_type == "B":
         accuracies = compute_class_matrix_B(models, num_classes, x_test, y_test)
     else:
         accuracies = compute_class_matrix_overall(models, num_classes, x_test, y_test)
@@ -71,15 +71,15 @@ def optimize(models, num_classes, x_test, y_test, accuracies, threshold):
         model_nums = list(range(num_models))
 
         for j in range(num_models):
-            rand_model = random.randint(0, num_models - j - 1)
+            rand_index = random.randint(0, num_models - j - 1)
             model_num = model_nums.pop(rand_index)
 
-            prob = col[j]
+            prob = col[model_num]
             if prob > threshold:
-                best_model = j
+                best_model = model_num
                 break
-            else if best_model == -1 or prob > col[best_model]:
-                best_model = j
+            elif best_model == -1 or prob > col[best_model]:
+                best_model = model_num
         
         final_preds[i] = pred_matrix[best_model, i]
 
