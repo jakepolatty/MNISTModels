@@ -1,12 +1,10 @@
 import tensorflow as tf
 import time
 import numpy as np
+import random
 
 import helpers.helper_funcs as helpers
 #import helpers.cifar_models as models
-
-#RUN ALL 10 MODELS, PICK HEIGHEST PROBABILITY IN ENTIRE GRID
-#RUN ALL 10 MODELS, PICK HEIGHEST PROBABILITY WEIGHTED BY A OR B
 
 def main():
     print('Loading data...')
@@ -28,11 +26,11 @@ def main():
     models = [l1_model, l2_model, l3_model, l4_model, l5_model, l6_model, l7_model, l8_model, l9_model, l10_model]
     num_classes = 10
 
-    optimize(models, num_classes, x_test, y_test, weight_type="A")
+    optimize(models, num_classes, x_test, y_test, weight_type="A", threshold=0.8)
     #optimize(models, num_classes, x_test, y_test, weight_type="B")
     #optimize(models, num_classes, x_test, y_test)
 
-def weighted_optimize(models, num_classes, x_test, y_test, weight_type):
+def optimize(models, num_classes, x_test, y_test, weight_type, threshold):
     if weight_type == "A":
         accuracies = compute_class_matrix_A(models, num_classes, x_test, y_test)
     else weight_type == "B":
@@ -40,26 +38,42 @@ def weighted_optimize(models, num_classes, x_test, y_test, weight_type):
     else:
         accuracies = compute_class_matrix_overall(models, num_classes, x_test, y_test)
 
-    # prob_matrix = np.zeros((len(models), x_test.shape[0]))
-    # pred_matrix = np.zeros((len(models), x_test.shape[0]))
+    num_models = len(models)
+    num_samples = x_test.shape[0]
+    prob_matrix = np.zeros((num_models, num_samples))
+    pred_matrix = np.zeros((num_models, num_samples))
 
-    # for i in range(len(models)):
-    #     model = models[i]
-    #     model_probs = model.predict(x_test)
+    for i in range(num_models):
+        model = models[i]
+        model_probs = model.predict(x_test)
 
-    #     model_accuracies = np.transpose([accuracies[i]])
-    #     model_probs = (model_probs.T * model_accuracies).T
+        model_accuracies = np.transpose([accuracies[i]])
+        model_probs = (model_probs.T * model_accuracies).T
 
-    #     model_highest_probs = np.amax(model_probs, axis=1)
-    #     model_preds = np.argmax(model_probs, axis=1)
+        model_highest_probs = np.amax(model_probs, axis=1)
+        model_preds = np.argmax(model_probs, axis=1)
 
-    #     prob_matrix[i] = model_highest_probs
-    #     pred_matrix[i] = model_preds
+        prob_matrix[i] = model_highest_probs
+        pred_matrix[i] = model_preds
 
-    # final_preds = np.zeros(x_test.shape[0])
-    # for i in range(x_test.shape[0]):
-    #     col = prob_matrix[:, i]
-    #     final_preds[i] = pred_matrix[np.argmax(col), i]
+    final_preds = np.zeros(num_samples)
+    for i in range(num_samples):
+        col = prob_matrix[:, i]
+        best_model = -1
+        model_nums = list(range(num_models))
+
+        for j in range(num_models):
+            rand_model = random.randint(0, num_models - j - 1)
+            model_num = model_nums.pop(rand_index)
+
+            prob = col[j]
+            if prob > threshold:
+                best_model = j
+                break
+            else if best_model == -1 or prob > col[best_model]:
+                best_model = j
+        
+        final_preds[i] = pred_matrix[best_model, i]
 
     final_accuracy = tf.reduce_mean(tf.cast(tf.equal(final_preds, y_test), tf.float32)).numpy()
 
