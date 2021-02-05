@@ -26,11 +26,11 @@ def main():
     models = [l1_model, l2_model, l3_model, l4_model, l5_model, l6_model, l7_model, l8_model, l9_model, l10_model]
     num_classes = 10
 
-    optimize(models, num_classes, x_test, y_test, weight_type="A", threshold=0.8)
+    average_optimization(models, num_classes, x_test, y_test, weight_type="A", threshold=0.8, iterations=1)    
     #optimize(models, num_classes, x_test, y_test, weight_type="B")
     #optimize(models, num_classes, x_test, y_test)
 
-def optimize(models, num_classes, x_test, y_test, weight_type, threshold):
+def average_optimization(models, num_classes, x_test, y_test, weight_type, threshold, iterations):
     if weight_type == "A":
         accuracies = compute_class_matrix_A(models, num_classes, x_test, y_test)
     else weight_type == "B":
@@ -38,6 +38,14 @@ def optimize(models, num_classes, x_test, y_test, weight_type, threshold):
     else:
         accuracies = compute_class_matrix_overall(models, num_classes, x_test, y_test)
 
+    total_accuracy = 0
+    for i in range(iterations):
+        total_accuracy += optimize(models, num_classes, x_test, y_test, accuracies, threshold)
+
+    print("Average Accuracy: ", total_accuracy / iterations)
+
+
+def optimize(models, num_classes, x_test, y_test, accuracies, threshold):
     num_models = len(models)
     num_samples = x_test.shape[0]
     prob_matrix = np.zeros((num_models, num_samples))
@@ -76,8 +84,8 @@ def optimize(models, num_classes, x_test, y_test, weight_type, threshold):
         final_preds[i] = pred_matrix[best_model, i]
 
     final_accuracy = tf.reduce_mean(tf.cast(tf.equal(final_preds, y_test), tf.float32)).numpy()
-
-    print("Final accuracy: ", final_accuracy)
+    print("Accuracy: ", final_accuracy)
+    return final_accuracy
 
 
 
