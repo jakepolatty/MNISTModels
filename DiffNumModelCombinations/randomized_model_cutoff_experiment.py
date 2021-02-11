@@ -29,13 +29,13 @@ def main():
     num_classes = 10
 
     thresholds = [0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95]
-    run_experiment(models, num_classes, x_test, y_test, thresholds=thresholds, iterations=10)    
+    weight_types = ["A", "B", "C", "O", "Other"]
+    run_experiment(models, num_classes, x_test, y_test, thresholds=thresholds, weight_types=weight_types, iterations=10)    
 
 
-def run_experiment(models, num_classes, x_test, y_test, thresholds, iterations, random=True):
+def run_experiment(models, num_classes, x_test, y_test, thresholds, weight_types, iterations, random=True):
     final_accuracies = np.zeros((4, len(thresholds)))
     model_counts = np.zeros((len(models), len(thresholds)))
-    weight_types = ["A", "B", "O", "Other"]
 
     for i in range(len(weight_types)):
         weight_type = weight_types[i]
@@ -43,6 +43,8 @@ def run_experiment(models, num_classes, x_test, y_test, thresholds, iterations, 
             accuracies = compute_class_matrix_A(models, num_classes, x_test, y_test)
         elif weight_type == "B":
             accuracies = compute_class_matrix_B(models, num_classes, x_test, y_test)
+        elif weight_type == "C":
+            accuracies = compute_class_matrix_C(models, num_classes, x_test, y_test)
         elif weight_type == "O":
             accuracies = compute_class_matrix_overall(models, num_classes, x_test, y_test)
         else:
@@ -220,6 +222,38 @@ def compute_class_matrix_B(models, num_classes, x_test, y_test):
             # Compute the number of times where the prediction matches the test output for that class
             class_count = len(np.where((model_preds == j) & (y_test_np == j))[0])
             accuracies[i][j] = class_count / count_dicts[i][j]
+
+    print(accuracies)
+    return accuracies
+
+def compute_class_matrix_C(models, num_classes, x_test, y_test):
+    # Get dictionary of counts of each class in y_test
+    y_test_np = y_test.numpy()
+    unique_r, counts_r = np.unique(y_test_np, return_counts=True)
+    count_dict_recall = dict(zip(unique_r, counts_r))
+    count_dicts_precision = []
+
+    # Set up accuracy grid
+    num_models = len(models)
+    accuracies = np.zeros((num_models, num_classes))
+
+    # Iterate over all models and get their predicted outputs
+    for i in range(num_models):
+        model = models[i]
+
+        model_probs = model.predict(x_test)
+        model_preds = np.argmax(model_probs, axis=1)
+
+        unique_p, counts_p = np.unique(model_preds, return_counts=True)
+        count_dicts_precision.append(dict(zip(unique_p, counts_p)))
+
+        # Iterate over all 10 classes
+        for j in range(num_classes):
+            # Compute the number of times where the prediction matches the test output for that class
+            class_count = len(np.where((model_preds == j) & (y_test_np == j))[0])
+            recall = class_count / count_dict_recall[j]
+            precision = class_count / count_dicts_precision[i][j]
+            accuracies[i][j] = 2 * (precision * recall) / (precision + recall)
 
     print(accuracies)
     return accuracies
