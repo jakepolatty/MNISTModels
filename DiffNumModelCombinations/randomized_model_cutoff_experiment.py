@@ -6,7 +6,6 @@ import random
 import helpers.helper_funcs as helpers
 #import helpers.cifar_models as models
 
-# Count number of calls to each model as time metric
 # Method C: weights by F1 score
 
 def main():
@@ -35,6 +34,7 @@ def main():
 
 def run_experiment(models, num_classes, x_test, y_test, thresholds, iterations, random=True):
     final_accuracies = np.zeros((4, len(thresholds)))
+    model_counts = np.zeros((len(models), len(thresholds)))
     weight_types = ["A", "B", "O", "Other"]
 
     for i in range(len(weight_types)):
@@ -51,27 +51,32 @@ def run_experiment(models, num_classes, x_test, y_test, thresholds, iterations, 
         if random:
             for j in range(len(thresholds)):
                 threshold = thresholds[j]
-                final_accuracies[i][j] = average_optimization(models, num_classes, x_test, y_test, 
-                    accuracies, threshold, iterations)
+                acc, counts = average_optimization(models, num_classes, x_test, y_test, accuracies, threshold, iterations)
+                final_accuracies[i][j] = acc
+                model_counts[i] = counts
                 print(weight_type, " - ", threshold, " - Average Accuracy: ", final_accuracies[i][j])
         else:
             model_accuracies = compute_class_matrix_overall(models, num_classes, x_test, y_test)[:, 0]
             model_order = np.argsort(model_accuracies)
             for j in range(len(thresholds)):
                 threshold = thresholds[j]
-                final_accuracies[i][j] = optimize_linear(models, num_classes, x_test, y_test,
-                    accuracies, threshold, model_order)
+                acc, counts = optimize_linear(models, num_classes, x_test, y_test, accuracies, threshold, model_order)
+                final_accuracies[i][j] = acc
+                model_counts[i] = counts
                 print(weight_type, " - ", threshold, " - Average Accuracy: ", final_accuracies[i][j])
 
-    print(final_accuracies)
+    print(final_accuracies, model_counts)
 
 
 def average_optimization(models, num_classes, x_test, y_test, accuracies, threshold, iterations):
     total_accuracy = 0
+    model_counts = np.zeros(len(models))
     for i in range(iterations):
-        total_accuracy += optimize_random(models, num_classes, x_test, y_test, accuracies, threshold)
+        acc, counts = optimize_random(models, num_classes, x_test, y_test, accuracies, threshold)
+        total_accuracy += acc
+        model_counts += counts
 
-    return total_accuracy / iterations
+    return total_accuracy / iterations, model_counts / iterations
 
 
 def optimize_random(models, num_classes, x_test, y_test, accuracies, threshold):
@@ -79,6 +84,8 @@ def optimize_random(models, num_classes, x_test, y_test, accuracies, threshold):
     num_samples = x_test.shape[0]
     prob_matrix = np.zeros((num_models, num_samples))
     pred_matrix = np.zeros((num_models, num_samples))
+
+    model_counts = np.zeros(num_models)
 
     for i in range(num_models):
         model = models[i]
@@ -104,6 +111,7 @@ def optimize_random(models, num_classes, x_test, y_test, accuracies, threshold):
             model_num = model_nums.pop(rand_index)
 
             prob = col[model_num]
+            model_counts[model_num] += 1
             if prob > threshold:
                 best_model = model_num
                 break
@@ -114,7 +122,7 @@ def optimize_random(models, num_classes, x_test, y_test, accuracies, threshold):
 
     final_accuracy = tf.reduce_mean(tf.cast(tf.equal(final_preds, y_test), tf.float32)).numpy()
     #print("Accuracy: ", final_accuracy)
-    return final_accuracy
+    return final_accuracy, model_counts
 
 
 def optimize_linear(models, num_classes, x_test, y_test, accuracies, threshold, model_order):
@@ -122,6 +130,8 @@ def optimize_linear(models, num_classes, x_test, y_test, accuracies, threshold, 
     num_samples = x_test.shape[0]
     prob_matrix = np.zeros((num_models, num_samples))
     pred_matrix = np.zeros((num_models, num_samples))
+
+    model_counts = np.zeros(num_models)
 
     for i in range(num_models):
         model = models[i]
@@ -146,6 +156,7 @@ def optimize_linear(models, num_classes, x_test, y_test, accuracies, threshold, 
             model_num = model_order[j]
 
             prob = col[model_num]
+            model_counts = np.zeros(num_models)
             if prob > threshold:
                 best_model = model_num
                 break
@@ -156,7 +167,7 @@ def optimize_linear(models, num_classes, x_test, y_test, accuracies, threshold, 
 
     final_accuracy = tf.reduce_mean(tf.cast(tf.equal(final_preds, y_test), tf.float32)).numpy()
     #print("Accuracy: ", final_accuracy)
-    return final_accuracy
+    return final_accuracy, model_counts
 
 
 def compute_class_matrix_A(models, num_classes, x_test, y_test):
