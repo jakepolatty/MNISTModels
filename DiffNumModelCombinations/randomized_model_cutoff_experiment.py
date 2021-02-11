@@ -6,6 +6,9 @@ import random
 import helpers.helper_funcs as helpers
 #import helpers.cifar_models as models
 
+# Count number of calls to each model as time metric
+# Method C: weights by F1 score
+
 def main():
     print('Loading data...')
     x_train, y_train, x_test, y_test = helpers.get_cifar10_data()
@@ -30,7 +33,7 @@ def main():
     run_experiment(models, num_classes, x_test, y_test, thresholds=thresholds, iterations=10)    
 
 
-def run_experiment(models, num_classes, x_test, y_test, thresholds, iterations):
+def run_experiment(models, num_classes, x_test, y_test, thresholds, iterations, random=True):
     final_accuracies = np.zeros((4, len(thresholds)))
     weight_types = ["A", "B", "O", "Other"]
 
@@ -45,11 +48,20 @@ def run_experiment(models, num_classes, x_test, y_test, thresholds, iterations):
         else:
             accuracies = compute_class_matrix_all_ones(models, num_classes)
 
-        for j in range(len(thresholds)):
-            threshold = thresholds[j]
-            final_accuracies[i][j] = average_optimization(models, num_classes, x_test, y_test, 
-                accuracies, threshold, iterations)
-            print(weight_type, " - ", threshold, " - Average Accuracy: ", final_accuracies[i][j])
+        if random:
+            for j in range(len(thresholds)):
+                threshold = thresholds[j]
+                final_accuracies[i][j] = average_optimization(models, num_classes, x_test, y_test, 
+                    accuracies, threshold, iterations)
+                print(weight_type, " - ", threshold, " - Average Accuracy: ", final_accuracies[i][j])
+        else:
+            model_accuracies = compute_class_matrix_overall(models, num_classes, x_test, y_test)[:, 0]
+            model_order = np.argsort(model_accuracies)
+            for j in range(len(thresholds)):
+                threshold = thresholds[j]
+                final_accuracies[i][j] = optimize_linear(models, num_classes, x_test, y_test,
+                    accuracies, threshold, model_order)
+                print(weight_type, " - ", threshold, " - Average Accuracy: ", final_accuracies[i][j])
 
     print(final_accuracies)
 
@@ -57,12 +69,12 @@ def run_experiment(models, num_classes, x_test, y_test, thresholds, iterations):
 def average_optimization(models, num_classes, x_test, y_test, accuracies, threshold, iterations):
     total_accuracy = 0
     for i in range(iterations):
-        total_accuracy += optimize(models, num_classes, x_test, y_test, accuracies, threshold)
+        total_accuracy += optimize_random(models, num_classes, x_test, y_test, accuracies, threshold)
 
     return total_accuracy / iterations
 
 
-def optimize(models, num_classes, x_test, y_test, accuracies, threshold):
+def optimize_random(models, num_classes, x_test, y_test, accuracies, threshold):
     num_models = len(models)
     num_samples = x_test.shape[0]
     prob_matrix = np.zeros((num_models, num_samples))
@@ -105,6 +117,47 @@ def optimize(models, num_classes, x_test, y_test, accuracies, threshold):
     return final_accuracy
 
 
+def optimize_linear(models, num_classes, x_test, y_test, accuracies, threshold, model_order):
+    num_models = len(models)
+    num_samples = x_test.shape[0]
+    prob_matrix = np.zeros((num_models, num_samples))
+    pred_matrix = np.zeros((num_models, num_samples))
+
+    for i in range(num_models):
+        model = models[i]
+        model_probs = model.predict(x_test)
+
+        model_accuracies = np.transpose([accuracies[i]])
+        model_probs = (model_probs.T * model_accuracies).T
+
+        model_highest_probs = np.amax(model_probs, axis=1)
+        model_preds = np.argmax(model_probs, axis=1)
+
+        prob_matrix[i] = model_highest_probs
+        pred_matrix[i] = model_preds
+
+    final_preds = np.zeros(num_samples)
+    for i in range(num_samples):
+        col = prob_matrix[:, i]
+        best_model = -1
+        model_nums = list(range(num_models))
+
+        for j in range(num_models):
+            model_num = model_order[j]
+
+            prob = col[model_num]
+            if prob > threshold:
+                best_model = model_num
+                break
+            elif best_model == -1 or prob > col[best_model]:
+                best_model = model_num
+        
+        final_preds[i] = pred_matrix[best_model, i]
+
+    final_accuracy = tf.reduce_mean(tf.cast(tf.equal(final_preds, y_test), tf.float32)).numpy()
+    #print("Accuracy: ", final_accuracy)
+    return final_accuracy
+
 
 def compute_class_matrix_A(models, num_classes, x_test, y_test):
     # Get dictionary of counts of each class in y_test
@@ -131,7 +184,6 @@ def compute_class_matrix_A(models, num_classes, x_test, y_test):
 
     print(accuracies)
     return accuracies
-
 
 def compute_class_matrix_B(models, num_classes, x_test, y_test):
     # Get dictionary of counts of each class in y_test
