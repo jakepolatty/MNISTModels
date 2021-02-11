@@ -158,7 +158,7 @@ def optimize_linear(models, num_classes, x_test, y_test, accuracies, threshold, 
             model_num = model_order[j]
 
             prob = col[model_num]
-            model_counts = np.zeros(num_models)
+            model_counts[model_num] += 1
             if prob > threshold:
                 best_model = model_num
                 break
