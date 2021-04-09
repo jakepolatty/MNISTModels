@@ -19,6 +19,28 @@ def get_cifar10_data():
 
     return (train_images, train_labels, test_images, test_labels)
 
+def get_cifar10_data_val():
+    (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.cifar10.load_data()
+
+    val_images = train_images[40000:]
+    val_labels = train_labels[40000:]
+    train_images = train_images[:40000]
+    train_labels = train_labels[:40000]
+
+    train_images = train_images.reshape(train_images.shape[0], 32, 32, 3)
+    val_images = val_images.reshape(val_images.shape[0], 32, 32, 3)
+    test_images = test_images.reshape(test_images.shape[0], 32, 32, 3)
+
+    train_images = train_images.astype('float32')
+    val_images = val_images.astype('float32')
+    test_images = test_images.astype('float32')
+
+    train_images /= 255.0
+    val_images /= 255.0
+    test_images /= 255.0
+
+    return (train_images, train_labels, val_images, val_labels, test_images, test_labels)
+
 def get_mnist_data():
     '''
     Get the MNIST data separated into training and testing inputs and labels.

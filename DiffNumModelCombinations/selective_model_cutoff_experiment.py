@@ -10,7 +10,8 @@ import helpers.helper_funcs as helpers
 
 def main():
     print('Loading data...')
-    x_train, y_train, x_test, y_test = helpers.get_cifar10_data()
+    x_train, y_train, x_val, y_val, x_test, y_test = helpers.get_cifar10_data_val()
+    y_val = tf.squeeze(y_val)
     y_test = tf.squeeze(y_test)
 
     print("Loading models...")
@@ -30,23 +31,23 @@ def main():
 
     thresholds = [0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95]
     weight_types = ["A", "B", "C", "O", "U"]
-    run_experiment(models, num_classes, x_test, y_test, thresholds=thresholds, weight_types=weight_types, iterations=10, random=False)    
+    run_experiment(models, num_classes, x_test, y_test, x_val, y_val, thresholds=thresholds, weight_types=weight_types, iterations=10, random=False)    
 
 
-def run_experiment(models, num_classes, x_test, y_test, thresholds, weight_types, iterations, random=True):
+def run_experiment(models, num_classes, x_test, y_test, x_val, y_val, thresholds, weight_types, iterations, random=True):
     final_accuracies = np.zeros((len(weight_types), len(thresholds)))
     model_counts = np.zeros((len(weight_types), len(thresholds)))
 
     for i in range(len(weight_types)):
         weight_type = weight_types[i]
         if weight_type == "A":
-            accuracies = compute_class_matrix_A(models, num_classes, x_test, y_test)
+            accuracies = compute_class_matrix_A(models, num_classes, x_val, y_val)
         elif weight_type == "B":
-            accuracies = compute_class_matrix_B(models, num_classes, x_test, y_test)
+            accuracies = compute_class_matrix_B(models, num_classes, x_val, y_val)
         elif weight_type == "C":
-            accuracies = compute_class_matrix_C(models, num_classes, x_test, y_test)
+            accuracies = compute_class_matrix_C(models, num_classes, x_val, y_val)
         elif weight_type == "O":
-            accuracies = compute_class_matrix_overall(models, num_classes, x_test, y_test)
+            accuracies = compute_class_matrix_overall(models, num_classes, x_val, y_val)
         else:
             accuracies = compute_class_matrix_all_ones(models, num_classes)
 

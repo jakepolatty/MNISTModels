@@ -2,7 +2,8 @@ import tensorflow as tf
 import time
 import numpy as np
 import random
-import simple_rl
+from simple_rl.run_experiments import run_agents_on_mdp
+from simple_rl.agents import QLearningAgent
 
 import helpers.helper_funcs as helpers
 #import helpers.cifar_models as models
