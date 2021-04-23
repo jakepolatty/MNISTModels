@@ -21,15 +21,15 @@ def main():
     l1_model = tf.keras.models.load_model('models/cifar/l1_model')
     l2_model = tf.keras.models.load_model('models/cifar/l2_model')
     l3_model = tf.keras.models.load_model('models/cifar/l3_model')
-    l4_model = tf.keras.models.load_model('models/cifar/l4_model')
-    l5_model = tf.keras.models.load_model('models/cifar/l5_model')
-    l6_model = tf.keras.models.load_model('models/cifar/l6_model')
-    l7_model = tf.keras.models.load_model('models/cifar/l7_model')
-    l8_model = tf.keras.models.load_model('models/cifar/l8_model')
-    l9_model = tf.keras.models.load_model('models/cifar/l9_model')
-    l10_model = tf.keras.models.load_model('models/cifar/l10_model')
+    # l4_model = tf.keras.models.load_model('models/cifar/l4_model')
+    # l5_model = tf.keras.models.load_model('models/cifar/l5_model')
+    # l6_model = tf.keras.models.load_model('models/cifar/l6_model')
+    # l7_model = tf.keras.models.load_model('models/cifar/l7_model')
+    # l8_model = tf.keras.models.load_model('models/cifar/l8_model')
+    # l9_model = tf.keras.models.load_model('models/cifar/l9_model')
+    # l10_model = tf.keras.models.load_model('models/cifar/l10_model')
 
-    models = [l1_model, l2_model, l3_model, l4_model, l5_model, l6_model, l7_model, l8_model, l9_model, l10_model]
+    models = [l1_model, l2_model, l3_model]
     num_classes = 10
 
     thresholds = [0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95]
@@ -45,18 +45,20 @@ def main():
     rand_agent = RandomAgent(actions=mdp.get_actions())
 
     # Run experiment and make plot.
-    run_agents_on_mdp([ql_agent, rmax_agent, rand_agent], mdp, instances=5, episodes=50, steps=10)
+    #run_agents_on_mdp([ql_agent, rmax_agent, rand_agent], mdp, instances=5, episodes=50, steps=10)
 
-    # run_rl_experiment(models, num_classes, x_test, y_test)
+    run_rl_experiment(models, num_classes, x_test, y_test, 0.7)
 
 
-def run_rl_experiment(models, num_classes, x_test, y_test):
+def run_rl_experiment(models, num_classes, x_test, y_test, cutoff):
     num_models = len(models)
     num_samples = x_test.shape[0]
     prob_matrix = np.zeros((num_models, num_samples))
     pred_matrix = np.zeros((num_models, num_samples))
 
     model_counts = np.zeros(num_models)
+
+    accuracies = compute_class_matrix_B(models, num_classes, x_test, y_test)
 
     for i in range(num_models):
         model = models[i]
@@ -72,7 +74,7 @@ def run_rl_experiment(models, num_classes, x_test, y_test):
         pred_matrix[i] = model_preds
 
 
-    mdp = ModelSelectionMDP(models, y_test, pred_matrix)
+    mdp = ModelSelectionMDP(models, y_test, pred_matrix, prob_matrix, cutoff)
 
     ql_agent = QLearningAgent(actions=mdp.get_actions())
     rand_agent = RandomAgent(actions=mdp.get_actions())

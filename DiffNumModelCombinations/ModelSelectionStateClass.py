@@ -10,7 +10,7 @@ class ModelSelectionState(State):
         self.visited = visited
 
     def __hash__(self):
-        return hash(tuple(self.data))
+        return hash(tuple(self.visited))
 
     def __str__(self):
         return "Current: " + str(self.num) + " - Visited: " + str(self.visited)
