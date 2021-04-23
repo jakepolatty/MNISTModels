@@ -2,8 +2,10 @@ import tensorflow as tf
 import time
 import numpy as np
 import random
+from simple_rl.agents import QLearningAgent, RandomAgent, RMaxAgent
+from simple_rl.tasks import GridWorldMDP
+from ModelSelectionMDPClass import ModelSelectionMDP
 from simple_rl.run_experiments import run_agents_on_mdp
-from simple_rl.agents import QLearningAgent
 
 import helpers.helper_funcs as helpers
 #import helpers.cifar_models as models
@@ -32,7 +34,50 @@ def main():
 
     thresholds = [0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95]
     weight_types = ["A", "B", "C", "O", "U"]
-    run_experiment(models, num_classes, x_test, y_test, thresholds=thresholds, weight_types=weight_types, iterations=10)    
+    #run_experiment(models, num_classes, x_test, y_test, thresholds=thresholds, weight_types=weight_types, iterations=10)    
+
+    # Setup MDP.
+    mdp = GridWorldMDP(width=4, height=3, init_loc=(1, 1), goal_locs=[(4, 3)], lava_locs=[(4, 2)], gamma=0.95, walls=[(2, 2)], slip_prob=0.05)
+
+    # Setup Agents.
+    ql_agent = QLearningAgent(actions=mdp.get_actions())
+    rmax_agent = RMaxAgent(actions=mdp.get_actions())
+    rand_agent = RandomAgent(actions=mdp.get_actions())
+
+    # Run experiment and make plot.
+    run_agents_on_mdp([ql_agent, rmax_agent, rand_agent], mdp, instances=5, episodes=50, steps=10)
+
+    # run_rl_experiment(models, num_classes, x_test, y_test)
+
+
+def run_rl_experiment(models, num_classes, x_test, y_test):
+    num_models = len(models)
+    num_samples = x_test.shape[0]
+    prob_matrix = np.zeros((num_models, num_samples))
+    pred_matrix = np.zeros((num_models, num_samples))
+
+    model_counts = np.zeros(num_models)
+
+    for i in range(num_models):
+        model = models[i]
+        model_probs = model.predict(x_test)
+
+        model_accuracies = np.transpose([accuracies[i]])
+        model_probs = (model_probs.T * model_accuracies).T
+
+        model_highest_probs = np.amax(model_probs, axis=1)
+        model_preds = np.argmax(model_probs, axis=1)
+
+        prob_matrix[i] = model_highest_probs
+        pred_matrix[i] = model_preds
+
+
+    mdp = ModelSelectionMDP(models, y_test, pred_matrix)
+
+    ql_agent = QLearningAgent(actions=mdp.get_actions())
+    rand_agent = RandomAgent(actions=mdp.get_actions())
+
+    run_agents_on_mdp([ql_agent, rand_agent], mdp)
 
 
 def run_experiment(models, num_classes, x_test, y_test, thresholds, weight_types, iterations, random=True):
