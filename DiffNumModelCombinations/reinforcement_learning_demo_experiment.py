@@ -21,15 +21,15 @@ def main():
     l1_model = tf.keras.models.load_model('models/cifar/l1_model')
     l2_model = tf.keras.models.load_model('models/cifar/l2_model')
     l3_model = tf.keras.models.load_model('models/cifar/l3_model')
-    # l4_model = tf.keras.models.load_model('models/cifar/l4_model')
-    # l5_model = tf.keras.models.load_model('models/cifar/l5_model')
-    # l6_model = tf.keras.models.load_model('models/cifar/l6_model')
-    # l7_model = tf.keras.models.load_model('models/cifar/l7_model')
-    # l8_model = tf.keras.models.load_model('models/cifar/l8_model')
-    # l9_model = tf.keras.models.load_model('models/cifar/l9_model')
-    # l10_model = tf.keras.models.load_model('models/cifar/l10_model')
+    l4_model = tf.keras.models.load_model('models/cifar/l4_model')
+    l5_model = tf.keras.models.load_model('models/cifar/l5_model')
+    l6_model = tf.keras.models.load_model('models/cifar/l6_model')
+    l7_model = tf.keras.models.load_model('models/cifar/l7_model')
+    l8_model = tf.keras.models.load_model('models/cifar/l8_model')
+    l9_model = tf.keras.models.load_model('models/cifar/l9_model')
+    l10_model = tf.keras.models.load_model('models/cifar/l10_model')
 
-    models = [l1_model, l2_model, l3_model]
+    models = [l1_model, l2_model, l3_model, l4_model, l5_model, l6_model, l7_model, l8_model, l9_model, l10_model]
     num_classes = 10
 
     thresholds = [0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95]
@@ -73,8 +73,11 @@ def run_rl_experiment(models, num_classes, x_test, y_test, cutoff):
         prob_matrix[i] = model_highest_probs
         pred_matrix[i] = model_preds
 
+    overall_accuracies = compute_class_matrix_overall(models, num_classes, x_test, y_test)[:, 0]
+    model_rankings = np.argsort(np.argsort(overall_accuracies * -1)) + 1
+    print(model_rankings)
 
-    mdp = ModelSelectionMDP(models, y_test, pred_matrix, prob_matrix, cutoff)
+    mdp = ModelSelectionMDP(models, y_test, pred_matrix, prob_matrix, model_rankings, cutoff)
 
     ql_agent = QLearningAgent(actions=mdp.get_actions())
     rand_agent = RandomAgent(actions=mdp.get_actions())
