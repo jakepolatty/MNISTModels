@@ -6,8 +6,6 @@ import random
 import helpers.helper_funcs as helpers
 #import helpers.cifar_models as models
 
-# Method C: weights by F1 score
-
 def main():
     print('Loading data...')
     x_train, y_train, x_val, y_val, x_test, y_test = helpers.get_cifar10_data_val()
@@ -26,7 +24,7 @@ def main():
     l9_model = tf.keras.models.load_model('models/cifar/l9_model')
     l10_model = tf.keras.models.load_model('models/cifar/l10_model')
 
-    models = [l1_model, l2_model, l3_model, l4_model, l5_model, l6_model, l7_model, l8_model, l9_model, l10_model]
+    models = [l7_model, l8_model, l9_model, l10_model]
     num_classes = 10
 
     thresholds = [0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95]
@@ -34,6 +32,9 @@ def main():
     run_experiment(models, num_classes, x_test, y_test, x_val, y_val, thresholds=thresholds, weight_types=weight_types, iterations=10, random=False)    
 
 
+##################
+# Runtime Controls
+##################
 def run_experiment(models, num_classes, x_test, y_test, x_val, y_val, thresholds, weight_types, iterations, random=True):
     final_accuracies = np.zeros((len(weight_types), len(thresholds)))
     model_counts = np.zeros((len(weight_types), len(thresholds)))
@@ -59,12 +60,20 @@ def run_experiment(models, num_classes, x_test, y_test, x_val, y_val, thresholds
                 model_counts[i][j] = np.sum(counts)
                 print(weight_type, " - ", threshold, " - Average Accuracy: ", final_accuracies[i][j])
         else:
-            model_accuracies = compute_class_matrix_B(models, num_classes, x_test, y_test)
-            model_rankings = np.argsort(-1*model_accuracies, axis=0)
+            model_rankings = compute_double_ranking_matrix(models, num_classes, x_test, y_test)
+
+            # model_accuracies = compute_class_matrix_B(models, num_classes, x_test, y_test)
+            # model_rankings = np.argsort(-1*model_accuracies, axis=0)
+
+            # model_accuracies = compute_class_matrix_overall(models, num_classes, x_test, y_test)[:, 0]
+            # model_order = np.argsort(model_accuracies)
 
             for j in range(len(thresholds)):
                 threshold = thresholds[j]
-                acc, counts = optimize_selective(models, num_classes, x_test, y_test, accuracies, threshold, model_rankings)
+                acc, counts = optimize_double_selective(models, num_classes, x_test, y_test, accuracies, threshold, model_rankings)
+                #acc, counts = optimize_selective(models, num_classes, x_test, y_test, accuracies, threshold, model_rankings)
+                #acc, counts = optimize_linear(models, num_classes, x_test, y_test, accuracies, threshold, model_order)
+
                 final_accuracies[i][j] = acc
                 model_counts[i][j] = np.sum(counts)
                 print(weight_type, " - ", threshold, " - Average Accuracy: ", final_accuracies[i][j])
@@ -83,6 +92,9 @@ def average_optimization(models, num_classes, x_test, y_test, accuracies, thresh
     return total_accuracy / iterations, model_counts / iterations
 
 
+######################
+# Optimization Methods
+######################
 def optimize_random(models, num_classes, x_test, y_test, accuracies, threshold):
     num_models = len(models)
     num_samples = x_test.shape[0]
@@ -128,6 +140,65 @@ def optimize_random(models, num_classes, x_test, y_test, accuracies, threshold):
     #print("Accuracy: ", final_accuracy)
     return final_accuracy, model_counts
 
+def optimize_double_selective(models, num_classes, x_test, y_test, accuracies, threshold, model_rankings):
+    num_models = len(models)
+    num_samples = x_test.shape[0]
+    prob_matrix = np.zeros((num_models, num_samples))
+    pred_matrix = np.zeros((num_models, num_samples))
+    second_pred_matrix = np.zeros((num_models, num_samples))
+
+    model_counts = np.zeros(num_models)
+
+    for i in range(num_models):
+        model = models[i]
+        model_probs = model.predict(x_test)
+
+        model_accuracies = np.transpose([accuracies[i]])
+        model_probs = (model_probs.T * model_accuracies).T
+
+        model_highest_probs = np.amax(model_probs, axis=1)
+        model_preds = np.argmax(model_probs, axis=1)
+        second_model_preds = np.argpartition(model_probs, -2, axis=1)[:, -2]
+
+        prob_matrix[i] = model_highest_probs
+        pred_matrix[i] = model_preds
+        second_pred_matrix[i] = second_model_preds
+
+    final_preds = np.zeros(num_samples)
+    for i in range(num_samples):
+        col = prob_matrix[:, i]
+        best_model = -1
+        model_nums = list(range(num_models))
+
+        model_num = random.randint(0, num_models - 1)
+
+        for j in range(num_models):
+            model_nums.remove(model_num)
+
+            prob = col[model_num]
+            model_counts[model_num] += 1
+            if prob > threshold:
+                best_model = model_num
+                break
+            elif best_model == -1 or prob > col[best_model]:
+                best_model = model_num
+
+            current_pred = int(pred_matrix[model_num, i])
+            current_second = int(second_pred_matrix[model_num, i])
+            index = 10 * current_pred + current_second
+
+            pred_models = model_rankings[:, current_pred]
+            for k in range(num_models):
+                next_model = pred_models[k]
+                if next_model in model_nums:
+                    model_num = next_model
+                    break
+        
+        final_preds[i] = pred_matrix[best_model, i]
+
+    final_accuracy = tf.reduce_mean(tf.cast(tf.equal(final_preds, y_test), tf.float32)).numpy()
+    #print("Accuracy: ", final_accuracy)
+    return final_accuracy, model_counts
 
 def optimize_selective(models, num_classes, x_test, y_test, accuracies, threshold, model_rankings):
     num_models = len(models)
@@ -228,7 +299,9 @@ def optimize_linear(models, num_classes, x_test, y_test, accuracies, threshold, 
     #print("Accuracy: ", final_accuracy)
     return final_accuracy, model_counts
 
-
+##################
+# Accuracy Formats
+##################
 def compute_class_matrix_A(models, num_classes, x_test, y_test):
     # Get dictionary of counts of each class in y_test
     y_test_np = y_test.numpy()
@@ -338,7 +411,25 @@ def compute_class_matrix_all_ones(models, num_classes):
     print(accuracies)
     return accuracies
 
+###################
+# Complex Utilities
+###################
+def compute_double_ranking_matrix(models, num_classes, x_test, y_test):
+    num_models = len(models)
+    accuracies = compute_class_matrix_B(models, num_classes, x_test, y_test)
+    raw_rankings = np.zeros((num_models, num_classes * num_classes))
 
+    for i in range(num_models):
+        for j in range(num_classes):
+            for k in range(num_classes):
+                col = 10 * j + k
+                if j == k:
+                    raw_rankings[i][col] = 0
+                else:
+                    raw_rankings[i][col] = accuracies[i][j] + 0.1 * accuracies[i][k]
+
+    model_rankings = np.argsort(-1*raw_rankings, axis=0)
+    return model_rankings
 
 
 if __name__ == '__main__':
