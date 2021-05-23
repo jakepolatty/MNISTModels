@@ -29,15 +29,18 @@ def main():
 
     thresholds = [0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95]
     weight_types = ["A", "B", "C", "O", "U"]
-    run_experiment(models, num_classes, x_test, y_test, x_val, y_val, thresholds=thresholds, weight_types=weight_types, iterations=10, random=False)    
+    model_times = [0.00002400, 0.00002876, 0.00003061, 0.00003114, 0.00003804, 0.00004302, 0.00003061, 0.00003114, 0.00003804, 0.00004302]
+    experiment_type = "R"; # "L" "R" S" "D"
+    run_experiment(models, num_classes, x_test, y_test, x_val, y_val,
+        thresholds=thresholds, weight_types=weight_types, model_times=model_times, iterations=10, experiment_type=experiment_type)    
 
 
 ##################
 # Runtime Controls
 ##################
-def run_experiment(models, num_classes, x_test, y_test, x_val, y_val, thresholds, weight_types, iterations, random=True):
+def run_experiment(models, num_classes, x_test, y_test, x_val, y_val, thresholds, weight_types, model_times, iterations, experiment_type):
     final_accuracies = np.zeros((len(weight_types), len(thresholds)))
-    model_counts = np.zeros((len(weight_types), len(thresholds)))
+    times = np.zeros((len(weight_types), len(thresholds)))
 
     for i in range(len(weight_types)):
         weight_type = weight_types[i]
@@ -52,33 +55,47 @@ def run_experiment(models, num_classes, x_test, y_test, x_val, y_val, thresholds
         else:
             accuracies = compute_class_matrix_all_ones(models, num_classes)
 
-        if random:
+        if experiment_type == "R":
             for j in range(len(thresholds)):
                 threshold = thresholds[j]
                 acc, counts = average_optimization(models, num_classes, x_test, y_test, accuracies, threshold, iterations)
                 final_accuracies[i][j] = acc
-                model_counts[i][j] = np.sum(counts)
+                times[i][j] = np.dot(model_times, counts)
                 print(weight_type, " - ", threshold, " - Average Accuracy: ", final_accuracies[i][j])
-        else:
+        elif experiment_type == "L":
+            model_accuracies = compute_class_matrix_overall(models, num_classes, x_test, y_test)[:, 0]
+            model_order = np.argsort(model_accuracies)
+
+            for j in range(len(thresholds)):
+                threshold = thresholds[j]
+                acc, counts = optimize_linear(models, num_classes, x_test, y_test, accuracies, threshold, model_order)
+
+                final_accuracies[i][j] = acc
+                times[i][j] = np.dot(model_times, counts)
+                print(weight_type, " - ", threshold, " - Average Accuracy: ", final_accuracies[i][j])
+        elif experiment_type == "S":
+            model_accuracies = compute_class_matrix_B(models, num_classes, x_test, y_test)
+            model_rankings = np.argsort(-1*model_accuracies, axis=0)
+
+            for j in range(len(thresholds)):
+                threshold = thresholds[j]
+                acc, counts = optimize_selective(models, num_classes, x_test, y_test, accuracies, threshold, model_rankings)
+
+                final_accuracies[i][j] = acc
+                times[i][j] = np.dot(model_times, counts)
+                print(weight_type, " - ", threshold, " - Average Accuracy: ", final_accuracies[i][j])
+        elif experiment_type == "D":
             model_rankings = compute_double_ranking_matrix(models, num_classes, x_test, y_test)
-
-            # model_accuracies = compute_class_matrix_B(models, num_classes, x_test, y_test)
-            # model_rankings = np.argsort(-1*model_accuracies, axis=0)
-
-            # model_accuracies = compute_class_matrix_overall(models, num_classes, x_test, y_test)[:, 0]
-            # model_order = np.argsort(model_accuracies)
 
             for j in range(len(thresholds)):
                 threshold = thresholds[j]
                 acc, counts = optimize_double_selective(models, num_classes, x_test, y_test, accuracies, threshold, model_rankings)
-                #acc, counts = optimize_selective(models, num_classes, x_test, y_test, accuracies, threshold, model_rankings)
-                #acc, counts = optimize_linear(models, num_classes, x_test, y_test, accuracies, threshold, model_order)
-
+ 
                 final_accuracies[i][j] = acc
-                model_counts[i][j] = np.sum(counts)
+                times[i][j] = np.dot(model_times, counts)
                 print(weight_type, " - ", threshold, " - Average Accuracy: ", final_accuracies[i][j])
 
-    print(final_accuracies, model_counts)
+    print(final_accuracies, times)
 
 
 def average_optimization(models, num_classes, x_test, y_test, accuracies, threshold, iterations):
