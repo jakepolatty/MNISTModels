@@ -49,6 +49,8 @@ class ModelSelectionEnvironment(Environment):
     #####################
     # Execution Functions
     #####################
+
+    # TODO
     def compute_timestep(self, action):
         # Computes the state vector for the next state based upon the agent's selected action
         # Retrieves the output vector for the chosen model, loads it into the first part of the new
@@ -57,6 +59,7 @@ class ModelSelectionEnvironment(Environment):
         state = np.zeros(size=(state_size,))
         return state
 
+    # TODO
     def is_terminal(self):
         # Checks whether the execution has transitioned to a terminal state
         # Returns true if the state is terminal and false otherwise
@@ -70,7 +73,15 @@ class ModelSelectionEnvironment(Environment):
         # Rewards are scaled based upon the number of model calls that have been made, 
         # with a correct prediction in a single call giving the maximum reward and
         # an incorrect prediction after calling all models giving the minimum reward
-        return 0.0
+        if terminal:
+            model_cost = self.get_called_model_cost(next_state)
+
+            if is_correct_prediction(next_state):
+                return model_cost / self.min_cost
+            else:
+                return -1.0 * model_cost / self.max_cost
+        else:
+            return 0.0
 
     def execute(self, actions):
         # Utilizes the helper functions to compute the next state,
@@ -81,6 +92,40 @@ class ModelSelectionEnvironment(Environment):
         return next_state, terminal, reward
 
 
+    ##################
+    # Helper Functions
+    ##################
+
+    # TODO
+    def get_model_mask(self, state):
+        # Takes in the state dictionary and converts the called model mask segment
+        # into an array of zeros and ones
+        return np.zeros(size=self.num_models)
+
+    def get_called_model_count(self, state):
+        # Takes in the state dictionary and returns the number of called models
+        model_mask = self.get_model_mask(state)
+        return np.sum(model_mask)
+
+    def get_called_model_cost(self, state):
+        # Takes in the state dictionary and returns the total cost of the called models
+        # based upon the saved average cost array
+        model_mask = self.get_model_mask(state)
+        return np.dot(model_mask, self.avg_model_costs)
+
+    # TODO
+    def get_model_output(self, state):
+        # Takes in the state dictionary and converts the previous model output segment
+        # into an array of float values for the outputs
+        return np.zeros(size=self.output_size)
+
+    def is_correct_prediction(self, state):
+        # Takes in the state dictionary and returns whether the predicted output from the
+        # previously called model is the correct prediction for the current datapoint
+        # Note that this should only be called in terminal states to prevent early termination
+        model_output = self.get_model_output(state)
+        pred = np.argmax(model_output)
+        return pred == self.current_point.pred
 
 
 
