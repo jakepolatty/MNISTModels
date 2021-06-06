@@ -5,8 +5,21 @@ from tensorforce.environments import Environment
 
 class ModelSelectionEnvironment(Environment):
 
-    def __init__(self):
+    def __init__(self, num_models, output_size, model_outputs, y_test):
         super().__init__()
+
+        self.num_models = num_models
+        self.output_size = output_size
+
+        self.avg_model_costs = avg_model_costs
+        self.min_cost = np.amin(avg_model_costs)
+        self.max_cost = np.amax(avg_model_costs)
+
+        self.model_outputs = model_outputs
+        self.y_test = y_test
+        self.test_data_size = len(y_test)
+
+        self.current_point = -1
 
     ########################
     # Environment Definition
@@ -43,6 +56,9 @@ class ModelSelectionEnvironment(Environment):
         # The last [num_models] zeros represent a mask for all models that have been called (initially, none have)
         state_size = self.output_size + self.num_models
         state = np.zeros(size=(state_size,))
+
+        self.current_point = random.randint(0, self.test_data_size)
+
         return state
 
 
@@ -125,7 +141,7 @@ class ModelSelectionEnvironment(Environment):
         # Note that this should only be called in terminal states to prevent early termination
         model_output = self.get_model_output(state)
         pred = np.argmax(model_output)
-        return pred == self.current_point.pred
+        return pred == self.y_test[self.current_point]
 
 
 
