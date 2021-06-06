@@ -43,16 +43,16 @@ def run(environment, agent, n_episodes, test=False)
             states, terminal, reward = environment.execute(actions=actions)
             agent.observe(terminal=terminal, reward=reward)
 
-def runner(environment, agent, max_step_per_episode, n_episodes, n_episodes_test=1, combination=1):
+def runner(environment, agent, n_episodes, n_episodes_test=1, combination=1):
     # Train agent
     result_vec = [] #initialize the result list
     for i in range(round(n_episodes / 100)): #Divide the number of episodes into batches of 100 episodes
         if result_vec:
             print("batch", i, "Best result", result_vec[-1]) #Show the results for the current batch
         # Train Agent for 100 episode
-        run(environment, agent, 100, max_step_per_episode, combination=combination) 
+        run(environment, agent, 100, combination=combination) 
         # Test Agent for this batch
-        test_results = run(environment, agent, n_episodes_test, max_step_per_episode, combination=combination, test=True)
+        test_results = run(environment, agent, n_episodes_test, combination=combination, test=True)
         # Append the results for this batch
         result_vec.append(test_results) 
     # Plot the evolution of the agent over the batches
