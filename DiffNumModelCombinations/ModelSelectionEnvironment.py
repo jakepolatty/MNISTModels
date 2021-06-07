@@ -55,7 +55,7 @@ class ModelSelectionEnvironment(Environment):
         # The first [output_size] zeros represent the output of the upcoming model calls
         # The last [num_models] zeros represent a mask for all models that have been called (initially, none have)
         state_size = self.output_size + self.num_models
-        state = np.zeros(size=(state_size,))
+        state = np.zeros(shape=(state_size,))
 
         self.current_point = random.randint(0, self.test_data_size)
 
@@ -72,14 +72,14 @@ class ModelSelectionEnvironment(Environment):
         # Retrieves the output vector for the chosen model, loads it into the first part of the new
         # state vector, and updates the called model mask in the second half of the vector
         state_size = self.output_size + self.num_models
-        state = np.zeros(size=(state_size,))
+        state = np.zeros(shape=(state_size,))
         return state
 
     # TODO
     def is_terminal(self):
         # Checks whether the execution has transitioned to a terminal state
         # Returns true if the state is terminal and false otherwise
-        return false
+        return True
 
     def reward(self, next_state, terminal):
         # Computes the numerical reward value for the current state of the environment
@@ -92,7 +92,7 @@ class ModelSelectionEnvironment(Environment):
         if terminal:
             model_cost = self.get_called_model_cost(next_state)
 
-            if is_correct_prediction(next_state):
+            if self.is_correct_prediction(next_state):
                 return model_cost / self.min_cost
             else:
                 return -1.0 * model_cost / self.max_cost
@@ -102,6 +102,7 @@ class ModelSelectionEnvironment(Environment):
     def execute(self, actions):
         # Utilizes the helper functions to compute the next state,
         # determine whether this state is terminal, and return the reward
+        print("TEST")
         next_state = self.compute_timestep(actions)
         terminal = self.is_terminal()
         reward = self.reward(next_state, terminal)
@@ -116,7 +117,7 @@ class ModelSelectionEnvironment(Environment):
     def get_model_mask(self, state):
         # Takes in the state dictionary and converts the called model mask segment
         # into an array of zeros and ones
-        return np.zeros(size=self.num_models)
+        return np.zeros(shape=self.num_models)
 
     def get_called_model_count(self, state):
         # Takes in the state dictionary and returns the number of called models
@@ -133,7 +134,7 @@ class ModelSelectionEnvironment(Environment):
     def get_model_output(self, state):
         # Takes in the state dictionary and converts the previous model output segment
         # into an array of float values for the outputs
-        return np.zeros(size=self.output_size)
+        return np.zeros(shape=self.output_size)
 
     def is_correct_prediction(self, state):
         # Takes in the state dictionary and returns whether the predicted output from the
