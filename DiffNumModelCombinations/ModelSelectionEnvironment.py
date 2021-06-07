@@ -5,7 +5,7 @@ from tensorforce.environments import Environment
 
 class ModelSelectionEnvironment(Environment):
 
-    def __init__(self, num_models, output_size, model_outputs, y_test):
+    def __init__(self, num_models, output_size, model_outputs, y_test, avg_model_costs):
         super().__init__()
 
         self.num_models = num_models
