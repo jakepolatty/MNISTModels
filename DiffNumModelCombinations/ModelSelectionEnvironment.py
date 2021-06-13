@@ -61,8 +61,8 @@ class ModelSelectionEnvironment(Environment):
         state = np.zeros(shape=(self.output_size,))
         self.state = state
 
-        self.current_point = random.randint(0, self.test_data_size)
-        print("EPISODE", self.current_point)
+        self.current_point = random.randint(0, self.test_data_size - 1)
+        #print("EPISODE", self.current_point)
 
         action_mask = np.full((self.num_models + 1,), True, dtype=bool)
         action_mask[-1] = False
@@ -82,7 +82,7 @@ class ModelSelectionEnvironment(Environment):
         # Computes the state vector for the next state based upon the agent's selected action
         # Retrieves the output vector for the chosen model, loads it into the first part of the new
         # state vector, and updates the called model mask in the second half of the vector
-        print("ACTION", action)
+        #print("ACTION", action)
 
         self.update_model_mask(action)
 
@@ -106,7 +106,7 @@ class ModelSelectionEnvironment(Environment):
         # an incorrect prediction after calling all models giving the minimum reward
         if terminal:
             model_cost = self.get_called_model_cost()
-            print("COST", model_cost, self.min_cost, self.max_cost)
+            #print("COST", model_cost)
 
             if self.is_correct_prediction():
                 return self.min_cost / model_cost
@@ -122,7 +122,7 @@ class ModelSelectionEnvironment(Environment):
 
         terminal = self.is_terminal(actions)
         reward = self.reward(terminal)
-        print("REWARD", reward)
+        #print("REWARD", reward)
 
         state_plus_mask = {'state': self.state, 'action_mask': self.action_mask}
         return state_plus_mask, terminal, reward
@@ -160,7 +160,7 @@ class ModelSelectionEnvironment(Environment):
         # Note that this should only be called in terminal states to prevent early termination
         model_output = self.get_model_output()
         pred = np.argmax(model_output)
-        print(model_output, pred, self.y_test[self.current_point])
+        #print(model_output, pred, self.y_test[self.current_point])
         return pred == self.y_test[self.current_point]
 
     def update_model_mask(self, action):

@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+from collections import namedtuple
 from tensorforce import Agent, Environment
 from ModelSelectionEnvironment import ModelSelectionEnvironment
 import helpers.helper_funcs as helpers
@@ -38,7 +39,7 @@ def main():
         agent='ppo', environment=environment, batch_size=10, learning_rate=1e-3
     )
 
-    runner(environment, agent, n_episodes=300)
+    runner(environment, agent, n_episodes=5000)
 
 
 #################
@@ -85,17 +86,31 @@ def data_loader():
 # Running Controls
 ##################
 def run(environment, agent, n_episodes, test=False):
+    Score = namedtuple("Score", ["reward", "reward_mean"])
+    score = Score([], [])
+
     # Train for n_episodes
     for _ in range(n_episodes):
         # Initialize episode
         states = environment.reset()
+        internals = agent.initial_internals()
         terminal = False
 
         while not terminal:
-            # Episode timestep
-            actions = agent.act(states=states)
-            states, terminal, reward = environment.execute(actions=actions)
-            agent.observe(terminal=terminal, reward=reward)
+            if test:  # Test mode (deterministic, no exploration)
+                actions, internals = agent.act(
+                    states=states, internals=internals, independent=True
+                )
+                states, terminal, reward = environment.execute(actions=actions)
+            else: # Train mode (exploration and randomness)
+                actions = agent.act(states=states)
+                states, terminal, reward = environment.execute(actions=actions)
+                agent.observe(terminal=terminal, reward=reward)
+
+        score.reward.append(reward)
+        score.reward_mean.append(np.mean(score.reward))
+
+    return score.reward_mean[-1]
 
 def runner(environment, agent, n_episodes, n_episodes_test=1, combination=1):
     # Train agent
