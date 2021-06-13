@@ -13,7 +13,7 @@ class ModelSelectionEnvironment(Environment):
 
         self.avg_model_costs = avg_model_costs
         self.min_cost = np.amin(avg_model_costs)
-        self.max_cost = np.amax(avg_model_costs)
+        self.max_cost = np.sum(avg_model_costs)
 
         self.model_outputs = model_outputs
         self.y_test = y_test
@@ -65,6 +65,7 @@ class ModelSelectionEnvironment(Environment):
         print("EPISODE", self.current_point)
 
         action_mask = np.full((self.num_models + 1,), True, dtype=bool)
+        action_mask[-1] = False
         self.action_mask = action_mask
 
         state_plus_mask = {'state': state, 'action_mask': action_mask}
@@ -105,9 +106,10 @@ class ModelSelectionEnvironment(Environment):
         # an incorrect prediction after calling all models giving the minimum reward
         if terminal:
             model_cost = self.get_called_model_cost()
+            print("COST", model_cost, self.min_cost, self.max_cost)
 
             if self.is_correct_prediction():
-                return model_cost / self.min_cost
+                return self.min_cost / model_cost
             else:
                 return -1.0 * model_cost / self.max_cost
         else:
@@ -120,6 +122,7 @@ class ModelSelectionEnvironment(Environment):
 
         terminal = self.is_terminal(actions)
         reward = self.reward(terminal)
+        print("REWARD", reward)
 
         state_plus_mask = {'state': self.state, 'action_mask': self.action_mask}
         return state_plus_mask, terminal, reward
@@ -132,19 +135,19 @@ class ModelSelectionEnvironment(Environment):
     def get_model_mask(self):
         # Takes in the state dictionary and converts the called model mask segment
         # into an array of zeros and ones
-        raw_mask = self.action_mask[:self.num_models]
+        raw_mask = np.invert(self.action_mask[:self.num_models])
         return raw_mask.astype(int)
 
     def get_called_model_count(self):
         # Takes in the state dictionary and returns the number of called models
         model_mask = self.get_model_mask()
-        return np.sum(np.invert(model_mask))
+        return np.sum(model_mask)
 
     def get_called_model_cost(self):
         # Takes in the state dictionary and returns the total cost of the called models
         # based upon the saved average cost array
         model_mask = self.get_model_mask()
-        return np.dot(np.invert(model_mask), self.avg_model_costs)
+        return np.dot(model_mask, self.avg_model_costs)
 
     def get_model_output(self):
         # Takes in the state dictionary and converts the previous model output segment
@@ -157,12 +160,15 @@ class ModelSelectionEnvironment(Environment):
         # Note that this should only be called in terminal states to prevent early termination
         model_output = self.get_model_output()
         pred = np.argmax(model_output)
+        print(model_output, pred, self.y_test[self.current_point])
         return pred == self.y_test[self.current_point]
 
     def update_model_mask(self, action):
         # Takes in the state dictionary and action and returns a new model mask based upon
         # the selected model to call
         self.action_mask[action] = False
+        self.action_mask[-1] = True
+
         return self.action_mask
 
 
