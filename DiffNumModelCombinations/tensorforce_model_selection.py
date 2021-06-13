@@ -8,7 +8,6 @@ import pandas as pd
 import os
 
 def main():
-    print("TEST TEST TEST TEST")
     num_models, output_size, model_outputs, y_test, avg_model_costs = data_loader()    
     environment = ModelSelectionEnvironment(num_models, output_size, model_outputs, y_test, avg_model_costs)
 
