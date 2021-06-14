@@ -35,11 +35,22 @@ def main():
     #     summarizer=None, recorder=None
     # )
 
+    # agent = Agent.create(
+    #     agent='ppo', environment=environment, batch_size=10, learning_rate=1e-3
+    # )
+
     agent = Agent.create(
-        agent='ppo', environment=environment, batch_size=10, learning_rate=1e-3
+        agent='tensorforce',
+        environment=environment,  # alternatively: states, actions, (max_episode_timesteps)
+        memory=10000,
+        update=dict(unit='timesteps', batch_size=64),
+        optimizer=dict(type='adam', learning_rate=3e-4),
+        policy=dict(network='auto'),
+        objective='policy_gradient',
+        reward_estimation=dict(horizon=11)
     )
 
-    runner(environment, agent, n_episodes=5000)
+    runner(environment, agent, n_episodes=10000)
 
 
 #################
@@ -55,20 +66,21 @@ def data_loader():
     l1_model = tf.keras.models.load_model('models/cifar/l1_model')
     l2_model = tf.keras.models.load_model('models/cifar/l2_model')
     l3_model = tf.keras.models.load_model('models/cifar/l3_model')
-    #l4_model = tf.keras.models.load_model('models/cifar/l4_model')
-    # l5_model = tf.keras.models.load_model('models/cifar/l5_model')
-    # l6_model = tf.keras.models.load_model('models/cifar/l6_model')
-    # l7_model = tf.keras.models.load_model('models/cifar/l7_model')
-    # l8_model = tf.keras.models.load_model('models/cifar/l8_model')
-    # l9_model = tf.keras.models.load_model('models/cifar/l9_model')
-    # l10_model = tf.keras.models.load_model('models/cifar/l10_model')
-    models = [l1_model, l2_model, l3_model]
+    l4_model = tf.keras.models.load_model('models/cifar/l4_model')
+    l5_model = tf.keras.models.load_model('models/cifar/l5_model')
+    l6_model = tf.keras.models.load_model('models/cifar/l6_model')
+    l7_model = tf.keras.models.load_model('models/cifar/l7_model')
+    l8_model = tf.keras.models.load_model('models/cifar/l8_model')
+    l9_model = tf.keras.models.load_model('models/cifar/l9_model')
+    l10_model = tf.keras.models.load_model('models/cifar/l10_model')
+    models = [l1_model, l2_model, l3_model, l4_model, l5_model, l6_model, l7_model, l8_model, l9_model, l10_model]
+    #models = [l1_model, l2_model, l3_model]
 
     num_models = len(models)
     num_samples = x_test.shape[0]
     output_size = 10
-    #avg_model_costs = [0.2400, 0.2876, 0.3061, 0.3114, 0.3804, 0.4302, 0.3061, 0.3114, 0.3804, 0.4302]
-    avg_model_costs = [0.2400, 0.2876, 0.3061]
+    avg_model_costs = [0.2400, 0.2876, 0.3061, 0.3114, 0.3804, 0.4302, 0.3061, 0.3114, 0.3804, 0.4302]
+    #avg_model_costs = [0.2400, 0.2876, 0.3061]
 
     model_outputs = np.zeros((num_models, num_samples, output_size))
 
@@ -119,11 +131,11 @@ def runner(environment, agent, n_episodes, n_episodes_test=1, combination=1):
         if result_vec:
             print("batch", i, "Best result", result_vec[-1]) #Show the results for the current batch
         # Train Agent for 100 episode
-        run(environment, agent, 100) 
+        train_results = run(environment, agent, 100) 
         # Test Agent for this batch
         test_results = run(environment, agent, n_episodes_test, test=True)
         # Append the results for this batch
-        result_vec.append(test_results) 
+        result_vec.append(train_results) 
     # Plot the evolution of the agent over the batches
     plot_multiple(
         Series=[result_vec],
