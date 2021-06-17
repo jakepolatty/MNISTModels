@@ -21,7 +21,7 @@ class ModelSelectionEnvironment(Environment):
 
         self.current_point = -1
 
-        state_size = self.output_size
+        state_size = self.output_size + 1
         self.state = np.zeros(shape=(state_size,))
         self.action_mask = np.full((self.num_models + 1,), True, dtype=bool)
 
@@ -33,7 +33,7 @@ class ModelSelectionEnvironment(Environment):
         # first [output_size] values initialized to zeros for first model call
         # these [output_size] values will contain the output of the previous model for all later calls
         # last [num_models] values provide a mask of ones for all previously called models and zeros for uncalled models
-        state_size = self.output_size
+        state_size = self.output_size + 1
         return dict(type='float', shape=(state_size,))
 
     def actions(self):
@@ -58,7 +58,8 @@ class ModelSelectionEnvironment(Environment):
         # Initialize a state vector of all zeros
         # The first [output_size] zeros represent the output of the upcoming model calls
         # The last [num_models] zeros represent a mask for all models that have been called (initially, none have)
-        state = np.zeros(shape=(self.output_size,))
+        state = np.zeros(shape=(self.output_size + 1,))
+        state[-1] = -1
         self.state = state
 
         self.current_point = random.randint(0, self.test_data_size - 1)
@@ -88,7 +89,7 @@ class ModelSelectionEnvironment(Environment):
 
         if action < self.num_models:
             model_output = self.model_outputs[action][self.current_point]
-            self.state = model_output
+            self.state = np.append(model_output, action)
         
 
     def is_terminal(self, action):
@@ -152,7 +153,7 @@ class ModelSelectionEnvironment(Environment):
     def get_model_output(self):
         # Takes in the state dictionary and converts the previous model output segment
         # into an array of float values for the outputs
-        return self.state
+        return self.state[:-1]
 
     def is_correct_prediction(self):
         # Takes in the state dictionary and returns whether the predicted output from the

@@ -47,10 +47,10 @@ def main():
         optimizer=dict(type='adam', learning_rate=3e-4),
         policy=dict(network='auto'),
         objective='policy_gradient',
-        reward_estimation=dict(horizon=11)
+        reward_estimation=dict(horizon=num_models+1)
     )
 
-    runner(environment, agent, n_episodes=10000)
+    runner(environment, agent, n_episodes=50000)
 
 
 #################
@@ -66,21 +66,21 @@ def data_loader():
     l1_model = tf.keras.models.load_model('models/cifar/l1_model')
     l2_model = tf.keras.models.load_model('models/cifar/l2_model')
     l3_model = tf.keras.models.load_model('models/cifar/l3_model')
-    l4_model = tf.keras.models.load_model('models/cifar/l4_model')
-    l5_model = tf.keras.models.load_model('models/cifar/l5_model')
-    l6_model = tf.keras.models.load_model('models/cifar/l6_model')
-    l7_model = tf.keras.models.load_model('models/cifar/l7_model')
-    l8_model = tf.keras.models.load_model('models/cifar/l8_model')
-    l9_model = tf.keras.models.load_model('models/cifar/l9_model')
-    l10_model = tf.keras.models.load_model('models/cifar/l10_model')
-    models = [l1_model, l2_model, l3_model, l4_model, l5_model, l6_model, l7_model, l8_model, l9_model, l10_model]
-    #models = [l1_model, l2_model, l3_model]
+    # l4_model = tf.keras.models.load_model('models/cifar/l4_model')
+    # l5_model = tf.keras.models.load_model('models/cifar/l5_model')
+    # l6_model = tf.keras.models.load_model('models/cifar/l6_model')
+    # l7_model = tf.keras.models.load_model('models/cifar/l7_model')
+    # l8_model = tf.keras.models.load_model('models/cifar/l8_model')
+    # l9_model = tf.keras.models.load_model('models/cifar/l9_model')
+    # l10_model = tf.keras.models.load_model('models/cifar/l10_model')
+    #models = [l1_model, l2_model, l3_model, l4_model, l5_model, l6_model, l7_model, l8_model, l9_model, l10_model]
+    models = [l1_model, l2_model, l3_model]
 
     num_models = len(models)
     num_samples = x_test.shape[0]
     output_size = 10
-    avg_model_costs = [0.2400, 0.2876, 0.3061, 0.3114, 0.3804, 0.4302, 0.3061, 0.3114, 0.3804, 0.4302]
-    #avg_model_costs = [0.2400, 0.2876, 0.3061]
+    #avg_model_costs = [0.2400, 0.2876, 0.3061, 0.3114, 0.3804, 0.4302, 0.3061, 0.3114, 0.3804, 0.4302]
+    avg_model_costs = [0.2400, 0.2876, 0.3061]
 
     model_outputs = np.zeros((num_models, num_samples, output_size))
 
