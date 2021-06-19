@@ -2,15 +2,15 @@ import tensorflow as tf
 import numpy as np
 from collections import namedtuple
 from tensorforce import Agent, Environment
-from ModelSelectionEnvironment import ModelSelectionEnvironment
+from ModelSelectionEnvironmentV3 import ModelSelectionEnvironment
 import helpers.helper_funcs as helpers
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
 
 def main():
-    num_models, output_size, model_outputs, y_test, avg_model_costs = data_loader()    
-    environment = ModelSelectionEnvironment(num_models, output_size, model_outputs, y_test, avg_model_costs)
+    num_models, output_size, val_model_outputs, y_val, test_model_outputs, y_test, avg_model_costs = data_loader()    
+    environment = ModelSelectionEnvironment(num_models, output_size, val_model_outputs, y_val, test_model_outputs, y_test, avg_model_costs)
 
     # agent = Agent.create(
     #     agent='ppo', environment=environment,
@@ -50,7 +50,7 @@ def main():
         reward_estimation=dict(horizon=num_models+1)
     )
 
-    runner(environment, agent, n_episodes=50000)
+    runner(environment, agent, n_episodes=5000, n_episodes_test=y_test.shape[0])
 
 
 #################
@@ -82,16 +82,19 @@ def data_loader():
     #avg_model_costs = [0.2400, 0.2876, 0.3061, 0.3114, 0.3804, 0.4302, 0.3061, 0.3114, 0.3804, 0.4302]
     avg_model_costs = [0.2400, 0.2876, 0.3061]
 
-    model_outputs = np.zeros((num_models, num_samples, output_size))
+    val_model_outputs = np.zeros((num_models, x_val.shape[0], output_size))
+    test_model_outputs = np.zeros((num_models, num_samples, output_size))
 
     for i in range(num_models):
         model = models[i]
-        model_probs = model.predict(x_test)
-        print(model_probs.shape)
-        model_outputs[i] = model_probs
-        print(model_outputs.shape)
 
-    return num_models, output_size, model_outputs, y_test, avg_model_costs
+        val_model_probs = model.predict(x_val)
+        val_model_outputs[i] = val_model_probs
+
+        test_model_probs = model.predict(x_test)
+        test_model_outputs[i] = test_model_probs
+
+    return num_models, output_size, val_model_outputs, y_val, test_model_outputs, y_test, avg_model_costs
 
 
 ##################
@@ -100,11 +103,15 @@ def data_loader():
 def run(environment, agent, n_episodes, test=False):
     Score = namedtuple("Score", ["reward", "reward_mean"])
     score = Score([], [])
+    correct = 0
 
     # Train for n_episodes
-    for _ in range(n_episodes):
+    for i in range(n_episodes):
         # Initialize episode
-        states = environment.reset()
+        if test:
+            states = environment.reset(index=i)
+        else:
+            states = environment.reset()
         internals = agent.initial_internals()
         terminal = False
 
@@ -114,28 +121,35 @@ def run(environment, agent, n_episodes, test=False):
                     states=states, internals=internals, independent=True
                 )
                 states, terminal, reward = environment.execute(actions=actions)
+
+                if reward > 0:
+                    correct += 1
             else: # Train mode (exploration and randomness)
                 actions = agent.act(states=states)
                 states, terminal, reward = environment.execute(actions=actions)
                 agent.observe(terminal=terminal, reward=reward)
 
-        score.reward.append(reward)
-        score.reward_mean.append(np.mean(score.reward))
+                score.reward.append(reward)
+                score.reward_mean.append(np.mean(score.reward))
 
-    return score.reward_mean[-1]
+    if test:
+        return correct / n_episodes
+    else:
+        return score.reward_mean[-1]
 
 def runner(environment, agent, n_episodes, n_episodes_test=1, combination=1):
     # Train agent
     result_vec = [] #initialize the result list
     for i in range(round(n_episodes / 100)): #Divide the number of episodes into batches of 100 episodes
-        if result_vec:
-            print("batch", i, "Best result", result_vec[-1]) #Show the results for the current batch
         # Train Agent for 100 episode
         train_results = run(environment, agent, 100) 
         # Test Agent for this batch
-        test_results = run(environment, agent, n_episodes_test, test=True)
-        # Append the results for this batch
-        result_vec.append(train_results) 
+        if i % 5 == 0:
+            test_results = run(environment, agent, n_episodes_test, test=True)
+            # Append the results for this batch
+            result_vec.append(test_results) 
+            
+            print("batch", i, "Best result", result_vec[-1]) #Show the results for the current batch
     # Plot the evolution of the agent over the batches
     plot_multiple(
         Series=[result_vec],
