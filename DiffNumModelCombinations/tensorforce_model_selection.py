@@ -2,15 +2,16 @@ import tensorflow as tf
 import numpy as np
 from collections import namedtuple
 from tensorforce import Agent, Environment
-from ModelSelectionEnvironmentV2 import ModelSelectionEnvironment
+from ModelSelectionEnvironmentScaled import ModelSelectionEnvironment
 import helpers.helper_funcs as helpers
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
 
 def main():
-    num_models, output_size, val_model_outputs, y_val, test_model_outputs, y_test, avg_model_costs = data_loader()    
-    environment = ModelSelectionEnvironment(num_models, output_size, val_model_outputs, y_val, test_model_outputs, y_test, avg_model_costs)
+    num_models, output_size, val_model_outputs, y_val, test_model_outputs, y_test, avg_model_costs, weight_table = data_loader()    
+    environment = ModelSelectionEnvironment(num_models, output_size, val_model_outputs,
+        y_val, test_model_outputs, y_test, avg_model_costs, weight_table)
 
     # agent = Agent.create(
     #     agent='ppo', environment=environment,
@@ -50,7 +51,7 @@ def main():
         reward_estimation=dict(horizon=num_models+1)
     )
 
-    runner(environment, agent, n_episodes=50000, n_episodes_test=y_test.shape[0])
+    runner(environment, agent, n_episodes=10000, n_episodes_test=y_test.shape[0])
 
 
 #################
@@ -86,6 +87,7 @@ def data_loader():
     test_model_outputs = np.zeros((num_models, num_samples, output_size))
 
     for i in range(num_models):
+        print("Loading model " + str(i + 1) + " outputs...")
         model = models[i]
 
         val_model_probs = model.predict(x_val)
@@ -94,8 +96,38 @@ def data_loader():
         test_model_probs = model.predict(x_test)
         test_model_outputs[i] = test_model_probs
 
-    return num_models, output_size, val_model_outputs, y_val, test_model_outputs, y_test, avg_model_costs
+    print("Loading model weights...")
+    weight_table = compute_class_matrix_B(models, output_size, x_val, y_val)
 
+    return num_models, output_size, val_model_outputs, y_val, test_model_outputs, y_test, avg_model_costs, weight_table
+
+def compute_class_matrix_B(models, num_classes, x_test, y_test):
+    # Get dictionary of counts of each class in y_test
+    y_test_np = y_test.numpy()
+    count_dicts = []
+
+    # Set up accuracy grid
+    num_models = len(models)
+    accuracies = np.zeros((num_models, num_classes))
+
+    # Iterate over all models and get their predicted outputs
+    for i in range(num_models):
+        model = models[i]
+
+        model_probs = model.predict(x_test)
+        model_preds = np.argmax(model_probs, axis=1)
+
+        unique, counts = np.unique(model_preds, return_counts=True)
+        count_dicts.append(dict(zip(unique, counts)))
+
+        # Iterate over all 10 classes
+        for j in range(num_classes):
+            # Compute the number of times where the prediction matches the test output for that class
+            class_count = len(np.where((model_preds == j) & (y_test_np == j))[0])
+            accuracies[i][j] = class_count / count_dicts[i][j]
+
+    print(accuracies)
+    return accuracies
 
 ##################
 # Running Controls
