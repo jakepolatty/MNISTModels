@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 from collections import namedtuple
 from tensorforce import Agent, Environment
-from ModelSelectionEnvironmentV3 import ModelSelectionEnvironment
+from ModelSelectionEnvironmentV2 import ModelSelectionEnvironment
 import helpers.helper_funcs as helpers
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -50,7 +50,7 @@ def main():
         reward_estimation=dict(horizon=num_models+1)
     )
 
-    runner(environment, agent, n_episodes=5000, n_episodes_test=y_test.shape[0])
+    runner(environment, agent, n_episodes=50000, n_episodes_test=y_test.shape[0])
 
 
 #################
@@ -66,21 +66,21 @@ def data_loader():
     l1_model = tf.keras.models.load_model('models/cifar/l1_model')
     l2_model = tf.keras.models.load_model('models/cifar/l2_model')
     l3_model = tf.keras.models.load_model('models/cifar/l3_model')
-    # l4_model = tf.keras.models.load_model('models/cifar/l4_model')
-    # l5_model = tf.keras.models.load_model('models/cifar/l5_model')
-    # l6_model = tf.keras.models.load_model('models/cifar/l6_model')
-    # l7_model = tf.keras.models.load_model('models/cifar/l7_model')
-    # l8_model = tf.keras.models.load_model('models/cifar/l8_model')
-    # l9_model = tf.keras.models.load_model('models/cifar/l9_model')
-    # l10_model = tf.keras.models.load_model('models/cifar/l10_model')
-    #models = [l1_model, l2_model, l3_model, l4_model, l5_model, l6_model, l7_model, l8_model, l9_model, l10_model]
-    models = [l1_model, l2_model, l3_model]
+    l4_model = tf.keras.models.load_model('models/cifar/l4_model')
+    l5_model = tf.keras.models.load_model('models/cifar/l5_model')
+    l6_model = tf.keras.models.load_model('models/cifar/l6_model')
+    l7_model = tf.keras.models.load_model('models/cifar/l7_model')
+    l8_model = tf.keras.models.load_model('models/cifar/l8_model')
+    l9_model = tf.keras.models.load_model('models/cifar/l9_model')
+    l10_model = tf.keras.models.load_model('models/cifar/l10_model')
+    models = [l1_model, l2_model, l3_model, l4_model, l5_model, l6_model, l7_model, l8_model, l9_model, l10_model]
+    #models = [l1_model, l2_model, l3_model]
 
     num_models = len(models)
     num_samples = x_test.shape[0]
     output_size = 10
-    #avg_model_costs = [0.2400, 0.2876, 0.3061, 0.3114, 0.3804, 0.4302, 0.3061, 0.3114, 0.3804, 0.4302]
-    avg_model_costs = [0.2400, 0.2876, 0.3061]
+    avg_model_costs = [0.2400, 0.2876, 0.3061, 0.3114, 0.3804, 0.4302, 0.3061, 0.3114, 0.3804, 0.4302]
+    #avg_model_costs = [0.2400, 0.2876, 0.3061]
 
     val_model_outputs = np.zeros((num_models, x_val.shape[0], output_size))
     test_model_outputs = np.zeros((num_models, num_samples, output_size))
@@ -153,10 +153,10 @@ def runner(environment, agent, n_episodes, n_episodes_test=1, combination=1):
     # Plot the evolution of the agent over the batches
     plot_multiple(
         Series=[result_vec],
-        labels = ["Reward"],
-        xlabel = "episodes",
-        ylabel = "Reward",
-        title = "Reward vs episodes",
+        labels = ["Accuracy"],
+        xlabel = "Episodes",
+        ylabel = "Accuracy",
+        title = "Accuracy vs episodes",
         save_fig=False,
         path="env",
         folder=str(combination),

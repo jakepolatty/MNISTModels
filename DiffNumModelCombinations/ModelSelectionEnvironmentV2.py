@@ -2,10 +2,12 @@ import random
 import numpy as np
 from tensorforce.environments import Environment
 
+# Scaled outputs
+# Non-linear rewards
 
 class ModelSelectionEnvironment(Environment):
 
-    def __init__(self, num_models, output_size, model_outputs, y_test, avg_model_costs):
+    def __init__(self, num_models, output_size, val_model_outputs, y_val, test_model_outputs, y_test, avg_model_costs):
         super().__init__()
 
         self.num_models = num_models
@@ -15,7 +17,11 @@ class ModelSelectionEnvironment(Environment):
         self.min_cost = np.amin(avg_model_costs)
         self.max_cost = np.sum(avg_model_costs)
 
-        self.model_outputs = model_outputs
+        self.val_model_outputs = val_model_outputs
+        self.y_val = y_val
+        self.val_data_size = len(y_val)
+
+        self.test_model_outputs = test_model_outputs
         self.y_test = y_test
         self.test_data_size = len(y_test)
 
@@ -54,7 +60,7 @@ class ModelSelectionEnvironment(Environment):
     def close(self):
         super().close()
 
-    def reset(self):
+    def reset(self, index=-1):
         # Initialize a state vector of all zeros
         # The first [output_size] zeros represent the output of the upcoming model calls
         # The last [num_models] zeros represent a mask for all models that have been called (initially, none have)
@@ -62,7 +68,12 @@ class ModelSelectionEnvironment(Environment):
         state[-1] = -1
         self.state = state
 
-        self.current_point = random.randint(0, self.test_data_size - 1)
+        if index > -1:
+            self.current_point = index
+            self.test = True
+        else:
+            self.current_point = random.randint(0, self.val_data_size - 1)
+            self.test = False
         #print("EPISODE", self.current_point)
 
         action_mask = np.full((self.num_models + 1,), True, dtype=bool)
@@ -88,8 +99,12 @@ class ModelSelectionEnvironment(Environment):
         self.update_model_mask(action)
 
         if action < self.num_models:
-            model_output = self.model_outputs[action][self.current_point]
+            if self.test:
+                model_output = self.test_model_outputs[action][self.current_point]
+            else:
+                model_output = self.val_model_outputs[action][self.current_point]
             self.state = np.append(model_output, action)
+
         
 
     def is_terminal(self, action):
@@ -162,7 +177,10 @@ class ModelSelectionEnvironment(Environment):
         model_output = self.get_model_output()
         pred = np.argmax(model_output)
         #print(model_output, pred, self.y_test[self.current_point])
-        return pred == self.y_test[self.current_point]
+        if self.test:
+            return pred == self.y_test[self.current_point]
+        else:
+            return pred == self.y_val[self.current_point]
 
     def update_model_mask(self, action):
         # Takes in the state dictionary and action and returns a new model mask based upon
