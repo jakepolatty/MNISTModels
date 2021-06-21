@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 from collections import namedtuple
 from tensorforce import Agent, Environment
-from ModelSelectionEnvironmentScaled import ModelSelectionEnvironment
+from ModelSelectionEnvironmentCurved import ModelSelectionEnvironment
 import helpers.helper_funcs as helpers
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -11,7 +11,8 @@ import os
 def main():
     num_models, output_size, val_model_outputs, y_val, test_model_outputs, y_test, avg_model_costs, weight_table = data_loader()    
     environment = ModelSelectionEnvironment(num_models, output_size, val_model_outputs,
-        y_val, test_model_outputs, y_test, avg_model_costs, weight_table)
+         y_val, test_model_outputs, y_test, avg_model_costs)
+    #environment = ModelSelectionEnvironment(num_models, output_size, val_model_outputs, y_val, test_model_outputs, y_test, avg_model_costs, weight_table)
 
     # agent = Agent.create(
     #     agent='ppo', environment=environment,
@@ -51,7 +52,7 @@ def main():
         reward_estimation=dict(horizon=num_models+1)
     )
 
-    runner(environment, agent, n_episodes=10000, n_episodes_test=y_test.shape[0])
+    runner(environment, agent, n_episodes=50000, n_episodes_test=y_test.shape[0])
 
 
 #################
@@ -175,20 +176,21 @@ def runner(environment, agent, n_episodes, n_episodes_test=1, combination=1):
     for i in range(round(n_episodes / 100)): #Divide the number of episodes into batches of 100 episodes
         # Train Agent for 100 episode
         train_results = run(environment, agent, 100) 
+        result_vec.append(train_results)
         # Test Agent for this batch
-        if i % 5 == 0:
-            test_results = run(environment, agent, n_episodes_test, test=True)
-            # Append the results for this batch
-            result_vec.append(test_results) 
+        # if i % 5 == 0:
+        #     test_results = run(environment, agent, n_episodes_test, test=True)
+        #     # Append the results for this batch
+        #     result_vec.append(test_results) 
             
-            print("batch", i, "Best result", result_vec[-1]) #Show the results for the current batch
+        print("batch", i, "Best result", result_vec[-1]) #Show the results for the current batch
     # Plot the evolution of the agent over the batches
     plot_multiple(
         Series=[result_vec],
-        labels = ["Accuracy"],
+        labels = ["Reward"],
         xlabel = "Episodes",
-        ylabel = "Accuracy",
-        title = "Accuracy vs episodes",
+        ylabel = "Reward",
+        title = "Reward vs episodes",
         save_fig=False,
         path="env",
         folder=str(combination),

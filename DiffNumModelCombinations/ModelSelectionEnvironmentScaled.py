@@ -130,7 +130,7 @@ class ModelSelectionEnvironment(Environment):
             #print("COST", model_cost)
 
             if self.is_correct_prediction():
-                return self.min_cost / model_cost
+                return model_cost / self.min_cost
             else:
                 return -1.0 * model_cost / self.max_cost
         else:
