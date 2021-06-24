@@ -52,7 +52,8 @@ def main():
         reward_estimation=dict(horizon=num_models+1)
     )
 
-    runner(environment, agent, n_episodes=50000, n_episodes_test=y_test.shape[0])
+    time_weights = [x / 10000 for x in avg_model_costs]
+    runner(environment, agent, n_episodes=5000, n_episodes_test=y_test.shape[0], time_weights=time_weights)
 
 
 #################
@@ -68,21 +69,23 @@ def data_loader():
     l1_model = tf.keras.models.load_model('models/cifar/l1_model')
     l2_model = tf.keras.models.load_model('models/cifar/l2_model')
     l3_model = tf.keras.models.load_model('models/cifar/l3_model')
-    l4_model = tf.keras.models.load_model('models/cifar/l4_model')
-    l5_model = tf.keras.models.load_model('models/cifar/l5_model')
-    l6_model = tf.keras.models.load_model('models/cifar/l6_model')
-    l7_model = tf.keras.models.load_model('models/cifar/l7_model')
-    l8_model = tf.keras.models.load_model('models/cifar/l8_model')
-    l9_model = tf.keras.models.load_model('models/cifar/l9_model')
-    l10_model = tf.keras.models.load_model('models/cifar/l10_model')
-    models = [l1_model, l2_model, l3_model, l4_model, l5_model, l6_model, l7_model, l8_model, l9_model, l10_model]
-    #models = [l1_model, l2_model, l3_model]
+    #l4_model = tf.keras.models.load_model('models/cifar/l4_model')
+    #l5_model = tf.keras.models.load_model('models/cifar/l5_model')
+    #l6_model = tf.keras.models.load_model('models/cifar/l6_model')
+    #l7_model = tf.keras.models.load_model('models/cifar/l7_model')
+    #l8_model = tf.keras.models.load_model('models/cifar/l8_model')
+    #l9_model = tf.keras.models.load_model('models/cifar/l9_model')
+    #l10_model = tf.keras.models.load_model('models/cifar/l10_model')
+
+    #models = [l1_model, l2_model, l3_model, l4_model, l5_model, l6_model, l7_model, l8_model, l9_model, l10_model]
+    models = [l1_model, l2_model, l3_model]
+
+    #avg_model_costs = [0.2400, 0.2876, 0.3061, 0.3114, 0.3804, 0.4302, 0.3061, 0.3114, 0.3804, 0.4302]
+    avg_model_costs = [0.2400, 0.2876, 0.3061]
 
     num_models = len(models)
     num_samples = x_test.shape[0]
     output_size = 10
-    avg_model_costs = [0.2400, 0.2876, 0.3061, 0.3114, 0.3804, 0.4302, 0.3061, 0.3114, 0.3804, 0.4302]
-    #avg_model_costs = [0.2400, 0.2876, 0.3061]
 
     val_model_outputs = np.zeros((num_models, x_val.shape[0], output_size))
     test_model_outputs = np.zeros((num_models, num_samples, output_size))
@@ -133,10 +136,11 @@ def compute_class_matrix_B(models, num_classes, x_test, y_test):
 ##################
 # Running Controls
 ##################
-def run(environment, agent, n_episodes, test=False):
+def run(environment, agent, n_episodes, time_weights, test=False,):
     Score = namedtuple("Score", ["reward", "reward_mean"])
     score = Score([], [])
     correct = 0
+    total_time = 0
 
     # Train for n_episodes
     for i in range(n_episodes):
@@ -155,6 +159,9 @@ def run(environment, agent, n_episodes, test=False):
                 )
                 states, terminal, reward = environment.execute(actions=actions)
 
+                if not terminal:
+                    total_time += time_weights[actions]
+
                 if reward > 0:
                     correct += 1
             else: # Train mode (exploration and randomness)
@@ -166,31 +173,58 @@ def run(environment, agent, n_episodes, test=False):
                 score.reward_mean.append(np.mean(score.reward))
 
     if test:
-        return correct / n_episodes
+        return correct / n_episodes, total_time
     else:
         return score.reward_mean[-1]
 
-def runner(environment, agent, n_episodes, n_episodes_test=1, combination=1):
+def runner(environment, agent, n_episodes, time_weights, n_episodes_test=1, combination=1):
     # Train agent
-    result_vec = [] #initialize the result list
+    train_result_vec = []
+    test_result_vec = []
+    time_result_vec = []
     for i in range(round(n_episodes / 100)): #Divide the number of episodes into batches of 100 episodes
         # Train Agent for 100 episode
-        train_results = run(environment, agent, 100) 
-        result_vec.append(train_results)
+        train_results = run(environment, agent, 100, time_weights) 
+        train_result_vec.append(train_results)
         # Test Agent for this batch
-        # if i % 5 == 0:
-        #     test_results = run(environment, agent, n_episodes_test, test=True)
-        #     # Append the results for this batch
-        #     result_vec.append(test_results) 
+        if i % 5 == 0:
+            test_results, total_time = run(environment, agent, n_episodes_test, time_weights, test=True)
+            # Append the results for this batch
+            test_result_vec.append(test_results) 
+            time_result_vec.append(total_time)
             
-        print("batch", i, "Best result", result_vec[-1]) #Show the results for the current batch
+        print("batch", i, "Best result", train_result_vec[-1]) #Show the results for the current batch
     # Plot the evolution of the agent over the batches
+    # plot_multiple(
+    #     Series=[train_result_vec],
+    #     labels = ["Reward"],
+    #     xlabel = "Episodes",
+    #     ylabel = "Reward",
+    #     title = "Reward vs episodes",
+    #     save_fig=False,
+    #     path="env",
+    #     folder=str(combination),
+    #     time=False,
+    # )
+
     plot_multiple(
-        Series=[result_vec],
-        labels = ["Reward"],
+        Series=[test_result_vec],
+        labels = ["Acccuracy"],
         xlabel = "Episodes",
-        ylabel = "Reward",
-        title = "Reward vs episodes",
+        ylabel = "Accuracy",
+        title = "Accuracy vs episodes",
+        save_fig=False,
+        path="env",
+        folder=str(combination),
+        time=False,
+    )
+
+    plot_multiple(
+        Series=[time_result_vec],
+        labels = ["Time"],
+        xlabel = "Episodes",
+        ylabel = "Time",
+        title = "Time vs episodes",
         save_fig=False,
         path="env",
         folder=str(combination),
