@@ -52,6 +52,9 @@ def main():
         reward_estimation=dict(horizon=num_models+1)
     )
 
+    # Load agent from saved directory
+    # agent = tf.saved_model.load(export_dir="models/tensorforce")
+
     time_weights = [x / 10000 for x in avg_model_costs]
     runner(environment, agent, n_episodes=5000, n_episodes_test=y_test.shape[0], time_weights=time_weights)
 
@@ -230,6 +233,10 @@ def runner(environment, agent, n_episodes, time_weights, n_episodes_test=1, comb
         folder=str(combination),
         time=False,
     )
+
+    # Save the agent to a local file
+    agent.save(directory="models/tensorforce", format='saved-model')
+
     #Terminate the agent and the environment
     agent.close()
     environment.close()
