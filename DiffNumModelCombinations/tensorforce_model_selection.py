@@ -142,7 +142,7 @@ def compute_class_matrix_B(models, num_classes, x_test, y_test):
 def run(environment, agent, n_episodes, time_weights, test=False,):
     Score = namedtuple("Score", ["reward", "reward_mean"])
     score = Score([], [])
-    correct = 0
+    correct = np.zeros(10)
     total_time = 0
 
     # Train for n_episodes
@@ -166,7 +166,8 @@ def run(environment, agent, n_episodes, time_weights, test=False,):
                     total_time += time_weights[actions]
 
                 if reward > 0:
-                    correct += 1
+                    ind = i % 10
+                    correct[ind] += 1
             else: # Train mode (exploration and randomness)
                 actions = agent.act(states=states)
                 states, terminal, reward = environment.execute(actions=actions)
@@ -176,7 +177,8 @@ def run(environment, agent, n_episodes, time_weights, test=False,):
                 score.reward_mean.append(np.mean(score.reward))
 
     if test:
-        return correct / n_episodes, total_time
+        print("Test distribution: ", correct)
+        return np.sum(correct) / n_episodes, total_time
     else:
         return score.reward_mean[-1]
 
