@@ -87,13 +87,8 @@ def main():
     num_samples = x_test.shape[0]
     output_size = 10
 
-    all_accuracies = np.zeros((num_models - 1, 100))
-
-    current_model = 0
-    index = 0
-
+    # Pre-compute model outputs
     model_outputs = np.zeros((num_models, num_samples, output_size))
-
     for i in range(num_models):
         print("Loading model " + str(i + 1) + " outputs...")
         model = models[i]
@@ -101,17 +96,33 @@ def main():
         model_probs = model.predict(x_test)
         model_outputs[i] = model_probs
 
-    for i in range(num_models):
-        if i == current_model:
-            continue
-        else:
-            print("Running L" + str(current_model + 1) + " L" + str(i + 1) + "...")
-            accuracies = run_combinations(model_outputs[current_model], model_outputs[i], y_test)
-            #print("Accuracies:", accuracies)
-            all_accuracies[index] = accuracies
-            index += 1
 
-    print("Accuracies:", all_accuracies)
+    # Compute all combinations
+    for i in range(num_models):
+        for j in range(num_models):
+            if i == j:
+                continue
+            else:
+                print("Running L" + str(i + 1) + " L" + str(j + 1) + "...")
+                accuracies = run_combinations(model_outputs[i], model_outputs[j], y_test)
+                print("Accuracies:", accuracies)
+
+
+    # Compute combinations for specific model
+    # current_model = 0
+    # index = 0
+    # all_accuracies = np.zeros((num_models - 1, 100))
+    # for i in range(num_models):
+    #     if i == current_model:
+    #         continue
+    #     else:
+    #         print("Running L" + str(current_model + 1) + " L" + str(i + 1) + "...")
+    #         accuracies = run_combinations(model_outputs[current_model], model_outputs[i], y_test)
+    #         #print("Accuracies:", accuracies)
+    #         all_accuracies[index] = accuracies
+    #         index += 1
+
+    # print("Accuracies:", all_accuracies)
 
 if __name__ == '__main__':
     main()
