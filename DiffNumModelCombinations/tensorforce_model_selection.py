@@ -2,13 +2,17 @@ import tensorflow as tf
 import numpy as np
 from collections import namedtuple
 from tensorforce import Agent, Environment
-from ModelSelectionEnvironmentCurved import ModelSelectionEnvironment
+from ModelSelectionEnvironmentMain import ModelSelectionEnvironment
 import helpers.helper_funcs as helpers
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
 
 def main():
+    # Set random seeds
+    tf.random.set_seed(0)
+    np.random.seed(0)
+
     num_models, output_size, val_model_outputs, y_val, test_model_outputs, y_test, avg_model_costs, weight_table = data_loader()    
     environment = ModelSelectionEnvironment(num_models, output_size, val_model_outputs,
          y_val, test_model_outputs, y_test, avg_model_costs)
@@ -49,7 +53,8 @@ def main():
         optimizer=dict(type='adam', learning_rate=3e-4),
         policy=dict(network='auto'),
         objective='policy_gradient',
-        reward_estimation=dict(horizon=num_models+1)
+        reward_estimation=dict(horizon=num_models+1),
+        config=dict(seed=0)
     )
 
     # Load agent from saved directory
@@ -72,19 +77,19 @@ def data_loader():
     l1_model = tf.keras.models.load_model('models/cifar/l1_model')
     l2_model = tf.keras.models.load_model('models/cifar/l2_model')
     l3_model = tf.keras.models.load_model('models/cifar/l3_model')
-    #l4_model = tf.keras.models.load_model('models/cifar/l4_model')
-    #l5_model = tf.keras.models.load_model('models/cifar/l5_model')
-    #l6_model = tf.keras.models.load_model('models/cifar/l6_model')
-    #l7_model = tf.keras.models.load_model('models/cifar/l7_model')
-    #l8_model = tf.keras.models.load_model('models/cifar/l8_model')
-    #l9_model = tf.keras.models.load_model('models/cifar/l9_model')
-    #l10_model = tf.keras.models.load_model('models/cifar/l10_model')
+    l4_model = tf.keras.models.load_model('models/cifar/l4_model')
+    l5_model = tf.keras.models.load_model('models/cifar/l5_model')
+    l6_model = tf.keras.models.load_model('models/cifar/l6_model')
+    l7_model = tf.keras.models.load_model('models/cifar/l7_model')
+    l8_model = tf.keras.models.load_model('models/cifar/l8_model')
+    l9_model = tf.keras.models.load_model('models/cifar/l9_model')
+    l10_model = tf.keras.models.load_model('models/cifar/l10_model')
 
-    #models = [l1_model, l2_model, l3_model, l4_model, l5_model, l6_model, l7_model, l8_model, l9_model, l10_model]
-    models = [l1_model, l2_model, l3_model]
+    models = [l1_model, l2_model, l3_model, l4_model, l5_model, l6_model, l7_model, l8_model, l9_model, l10_model]
+    #models = [l1_model, l2_model, l3_model]
 
-    #avg_model_costs = [0.2400, 0.2876, 0.3061, 0.3114, 0.3804, 0.4302, 0.3061, 0.3114, 0.3804, 0.4302]
-    avg_model_costs = [0.2400, 0.2876, 0.3061]
+    avg_model_costs = [0.2400, 0.2876, 0.3061, 0.3114, 0.3804, 0.4302, 0.3061, 0.3114, 0.3804, 0.4302]
+    #avg_model_costs = [0.2400, 0.2876, 0.3061]
 
     num_models = len(models)
     num_samples = x_test.shape[0]
